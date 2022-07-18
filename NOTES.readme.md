@@ -271,7 +271,7 @@ npm install --save bootstrap
 
 <img src="images/adding in angular.json.png">
 
-### Step : 3 Rerun the serveer to bundle the package ###
+### Step : 3 Rerun the server to bundle the package ###
 
 * Save angular.json and other files and again use ng serve command to rerun .
 
@@ -340,3 +340,478 @@ platformBrowserDynamic().bootstrapModule(AppModule)
 * NOTE: It will also contains the javascript bundles run the angular application.
 
 <img src="images/insex.htmlwithjsbundles.png">
+
+# Section : 2 The Basics  #
+
+## Video : 1 Components ##
+
+* Components are the key feature of angular (i.e) We can build our whole application with multiple components.
+
+* Each component will have it's own :
+    
+    * HTML file.
+    * Styles file.
+    * Ts file ( Contains its own business logic ).
+
+* Componets are reusable ( Design , Styles , logics ).
+
+* It is is used to splinting up into many parts of our complete application.
+
+## Video : 2 Creating new componets mannually ##
+
+### app component ###
+
+* Before going to other components we must aware about appComponet which is root component.
+
+* appComponents will also have html.styles,specs and ts file with that.
+
+* The speciality is , the appComponent is one which has been provided in the bootstrap[] in app.module.ts which reprents that the app component is the one holds project.
+
+<img src="images/appcomponent.png">
+
+* We don't want to add other components in index.html.
+
+* We just need other components in the app.components.html itself.
+
+* The only selector which is added in the index.html is appComponent as below :
+
+<img src="images/app-root.png">
+
+### Very basic component features ###
+
+* When we say component , the .ts file is the building block . So the xxx.component.ts is the first thing , we should concern.
+
+* We have to do all operations in the app folder . SO we must create our compinents inside the app folder with ifferent names .
+
+* As we are going to understand only the simple features in components , we can create an seperate folder inside the app folder .
+
+* In the Demo component , we should create an file with extension .TS with proper naming.
+
+* Every component.ts file must contatin the following data 
+
+```javascript
+
+import { Component } from "@angular/core";
+
+@Component({
+ selector : 'app-demo',
+ template : './demp.component.html'
+}
+)
+
+
+export class DemoComponent{
+
+}
+
+```
+
+* 1) --> class
+
+     --> class is the maditory field in an component throughwhich the functionality of an component is decided ( business logic )
+
+     --> We must export the class with export keyword before that , inorder to import it anyother file or component.
+
+     --> class name should be meaningfull , first part should contain name and second part should 
+         contatin description.
+
+           Demo is the name and Component is the description.  ( DemoComponent ) .
+
+* 2 ) --> Decorator 
+ 
+      --> Decorator is the typescript feature which enhances the class or other elements .
+
+      --> Decorator always starts with @ symbol.
+
+      --> Decorator need to configured by passing javascript objects to it. Here are the most basic two configurartions.
+
+        1 ) --> Selector 
+
+            --> selector should be in staring .
+
+            --> It contains the name to utilize the component in another component .
+
+            --> The selector name should be unique.
+
+        2 ) -->  Templateurl 
+
+            --> This is the reference to the another file which contains the template html of our .ts file.
+
+            --> This html file must be created with the same folder with .html extension.
+
+* 3 ) --> import component .
+
+      --> To use the component decorator , we must import it from angular/core library file.
+
+
+## Video : 3 Understanding the role of appModueles ##
+
+* app.module is the very important to any angular project which is like the parent of a family.
+
+## Modules ##
+
+* Modules are used to bundles the different spieces( components ) of any application into packeges.
+
+## Very basic things in module ##
+
+
+<img src="images/modulebasic.png">
+
+
+* Here , we can identify the following features in module.
+
+* 1 ) --> An empty typescript class with export ( Same as Component )
+
+* 2 ) --> Decorator : 
+
+      --> Module decorator consists of @NgModule keyword in the beginning and it must be imported from 
+          angular/core library file.
+
+      --> Specially app.module.ts contains four basic properties and values as it's javascript object format 
+          similar to component.
+
+* 3 ) --> Decorator partitions :
+
+      --> 1) bootstrap :
+
+          --> It is responsible for angular to execute the first component when the app get started which
+              is appcomponent.    
+
+      --> 2 ) Declarations : 
+
+          --> In declarations section , we must add the compoents that we created.
+
+          --> The angular does not know the existance of component . So we need to update the every
+              components presence in module.ts to get results.
+
+          --> Once we added the component in declaration , it will ask to import the component from the 
+              specified  path we should import it.
+
+      --> 3 ) imports :
+
+          --> Imports section allow us to import the other modules.
+
+       --> 4 ) providers :
+
+          --> It is used for services.
+
+* Adding the democomponet in app.module.ts to make it use in project: 
+
+
+<img src="images/import_component_in_module.png">
+
+## video 4 : Using custom component ##
+
+* We can create custom components according to our need . 
+
+* Component can be also updated in the app.module.ts file.
+
+* But , we can not see it in the bowser.
+
+* For example : I have created a component named demo with simple .ts and .html which contains only simple text.
+
+* .html
+
+<img src="images/customcomponent_html.png">
+
+* .ts 
+
+<img src="images/custom component_ts.png">
+
+* Also i attached the component in app.module.ts succssfully as below:
+
+<img src="images/import_component_in_module.png">
+
+* But , we can't see this in browser . As we know , the angular flow will be start from index.html . In index.html ,
+only the root ( app module ) is connected .
+
+* In the app.component.html only contains the simple text . To link our new custom component in app , we must add our new component in app.component.html as an element.
+
+* To do so , we should use the selector of our custom component and utilize it in app.component.html as weee require.
+
+* For Example , I have used the selector of demoComponent in app.component.html as this.
+
+* app.component.html:
+
+```javascript
+
+<h1>Hi i am vijay's app componet</h1>
+<app-demo></app-demo>
+
+```
+
+* democomponent.ts
+
+```javascript
+
+import { Component } from "@angular/core";
+
+@Component({
+ selector : 'app-demo',
+ templateUrl : 'demo.component.html'
+}
+)
+
+
+export class DemoComponent{
+
+}
+
+```
+* Output :
+
+* Before using selctor as element in app.component.html:
+<br>
+
+<img src="images/before_using_selector_as_ele.png">
+
+* After using selector as element in app.component.html :
+
+<img src="images/after_using_selector_as_ele.png">
+
+
+
+## Video : 5 Creating component with cli and nesting components ##
+
+* We can create components with angular cli command :
+
+```javascript
+
+ng generate component component-name
+
+```
+* The shortcut of this command is :
+
+```javascript
+
+ng g c component-name
+
+```
+
+* These angular/cli command create a new folder in app folder with the 1 .html ,1 .style ,1 .spec and 1 .ts file with basic templates.
+
+* We need to update the existence of new component in app.module.ts
+
+<img src="images/cli_component.png">
+
+## Nesting component ##
+
+* Nesting means , using one component within other using the selector as element in the .html.
+
+* Angular allows repeat the components in same or different components .
+
+* app.component.html :
+
+```javascript
+<h1>Hi i am vijay's app componet</h1>
+<app-demo></app-demo>
+<app-cli-component></app-cli-component>
+```
+
+* cli.component.html : 
+
+```javascript
+
+<p>I am cli-component </p>
+<app-demo></app-demo>
+
+```
+
+## video : 6 Working with component Templates ##
+
+* A component contains not only three properies such as selector ,TemplateUrl and Stylesurl but these are all the basics,
+
+* Template is one of the most significant component decorartor property which allows internal html elements instaed connects the different .html file .
+
+* template is used to do inline template if it very simple . It is string type .
+
+* If code exists single element then we can use  ` ` { Back tick } symbol to denote the string as we do javascript.
+
+```javascript
+
+@Component({
+ selector : 'app-demo',
+ template : '<app-cli-component></app-cli-component>'  //here it is not link . it is used as element 
+}
+)
+
+```
+
+
+```javascript
+@Component({
+ selector : 'app-demo',
+ template : 
+ `<app-cli-component></app-cli-component>   
+ <app-cli-component></app-cli-component>`    //multiple lines
+}
+)
+```
+```javascript
+
+@Component({
+ selector : 'app-demo',
+ template : 
+`<h1> Hello everyone in ...<h1>`
+}
+)
+```
+## Video : 7 Working with component styles ##
+
+* styles is the another inportant component decorator which helps to inline styling ,
+
+* It is basically an array . So that we can add more than one style or inline styles .
+
+* In array , we should declare the ` ` { Back tick } to get results .
+
+* It is just inline styling nothing different .
+
+* It is slight differnt from styleUrl . styleUrl requires the seperate stylesheets to style but it is inline styling.
+  But , both are array format.
+
+```javascript
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  // styleUrls: ['./app.component.css'],
+  styles : [
+`
+.h1{
+  color:blue;       
+}
+`                 //  Using inlie styles
+]
+})
+
+```
+
+## Video : 8 Full understanding of component selector ##
+
+* selector is the main component decorator property to understand .
+
+* It is the source to connect the components .
+
+* Basically , a selector acts like CSS selector which only uses the element name to style .
+
+### Normal method ###
+
+app.component.html
+
+```javascript
+<div class="container">
+    <div class="row">
+     <div class="clo-xs-12">
+        <h1 class="h1">Hi i am vijay's app componet</h1>
+        <hr>
+        <app-demo></app-demo>     <!-- It is look like an HTML element -->
+        <app-cli-component></app-cli-component> 
+     </div>
+    </div>
+</div>
+```
+
+demo.component.ts file :
+
+```javascript
+import { Component } from "@angular/core";
+
+@Component({
+ selector : 'app-demo',   // Here we selected the element by it's name as we do in CSS
+ templateUrl : 'demo.component.html'
+}
+)
+
+
+export class DemoComponent{
+
+}
+```
+
+### Attribute method  ###
+
+* We can also use other method to utilize this selector which means attribute selector as follows :
+
+* app.component.html :
+
+```javascript
+<div class="container">
+    <div class="row">
+     <div class="clo-xs-12">
+        <h1 class="h1">Hi i am vijay's app componet</h1>
+        <hr>
+        <app-demo></app-demo>     <!-- It is look like an HTML element -->
+        <div app-cli></div>      <!-- We can select it by attribute name in .ts file -->
+      </div>
+    </div>
+</div>
+```
+
+* Using the attribute name in .ts file with [] notation :
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  // selector: 'app-cli-component',
+  selector : '[app-cli]',     // Using the attribute name as selector by [] notation
+  templateUrl: './cli-component.component.html',
+  styleUrls: ['./cli-component.component.css']
+})
+export class CliComponentComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+```
+
+### class method ###
+
+* We can also use the notation in .ts file as selector by using the element with class.
+
+* app.component.html file :
+
+```javascript
+<div class="container">
+    <div class="row">
+     <div class="clo-xs-12">
+        <h1 class="h1">Hi i am vijay's app componet</h1>
+        <hr>
+        <app-demo></app-demo>     <!-- It is look like an HTML element -->
+        <div app-cli></div>      <!-- We can select it by attribute name in .ts file -->
+        <div class="app-cli"><div>  <!-- We can select by the class name in .ts file -->
+      </div>
+    </div>
+</div>
+```
+
+* .ts file :
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  // selector: 'app-cli-component',
+  // selector : '[app-cli]',     // Using the attribute name as selector by [] notation
+  selector : '.app-cli',     // Using the class name with . notation .
+  templateUrl: './cli-component.component.html',
+  styleUrls: ['./cli-component.component.css']
+})
+export class CliComponentComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
+}
+```
+
+### NOTE ###
+
+* We cannot access selectors with id .
+
+* We cannot access the selectors by pseudo selectors like :hover or etc .
