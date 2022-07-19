@@ -815,3 +815,312 @@ export class CliComponentComponent implements OnInit {
 * We cannot access selectors with id .
 
 * We cannot access the selectors by pseudo selectors like :hover or etc .
+
+## Video : 9 Data Binding ##
+
+* Data-Binding is the communication between the Typescript code ( Business Logic ) and the Template ( HTML ) in a component.
+
+* The template is only visible to user ( HTML ) . Inorder to show the data dynamically , data-binding came to play to connect the typescript and template ( HTML ).
+
+* There are some type of data-bindings available as below :
+
+### One way Data-binding ###
+
+<img src="images/one_way_data-binding.png">
+
+### Two-way Data-binding ###
+
+<img src="images/two-way-data-binding.png">
+
+## Video : 10 String Interpolation ##
+
+* String interpolation is the simple data-binding which is used to pass the data dynamically from typescript to template ( HTML ).
+
+* In string interpolation , all data are converted to strinng in the end .
+
+* It uses the syntax <b style="color:blue">  {{ Typescript variable name OR Property name  }} </b>
+
+* We cannot use the multiline expressions in the {{ }} syntax .
+
+## Example : ##
+
+* .html file :
+
+```javascript
+<h3> Data Binding </h3>
+
+<h4> String interpolation </h4>
+
+<p> I am going to explain data-binding type : {{ type }} which is {{ name }} </p>
+
+<p> {{ getStringInterpolation() }}</p>
+```
+
+* .ts file :
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-data-binding',
+  templateUrl: './data-binding.component.html',
+  styleUrls: ['./data-binding.component.css']
+})
+export class DataBindingComponent implements OnInit {
+  type: number = 1;
+  name: string = "string interpolation";
+
+  getStringInterpolation(){
+    return "I am the string interpolation method who binds the method to html template from typescript";
+  }
+constructor() { }
+
+  ngOnInit(): void {}
+
+}
+
+```
+
+* OUTPUT:
+
+<img src="images/stringInterpolation.png">
+
+## Video : 11 Property Binding ##
+
+* Property binding is used to connect the attributes of an HTML element to the typescript file ( .TS file ).
+
+* The property-binding method changes the DOM { Document Object Model } of the specified html element.
+
+* We can bind the attributes of our html element by with the following syntax :
+
+* <b> [ Varible or name property name to bind ]   </b>
+
+## Example : ##
+
+* Now , we take a button element with the attribute disabled earlier.
+
+* Inorder to change the disabled  attribute with dynamic data from typescript , we must bind the attribute with [] symbol.
+
+* So , We can change the disabled attribute variale value to "true" to make it enable with typescript .
+
+* .html ( disabled property is binded with the variable status )
+
+```javascript
+<button
+ class="btn btn-success"
+ [disabled]="status"  
+> Disable me </button>
+```
+* .ts file ( Here we set variable true initially to keep it disable . After 1000 milliseconds we make the variabke to false to enable)
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-data-binding',
+  templateUrl: './data-binding.component.html',
+  styleUrls: ['./data-binding.component.css']
+})
+export class DataBindingComponent implements OnInit {
+  type: number = 1;
+  name: string = "string interpolation";
+  status: boolean =true; 
+
+  getStringInterpolation(){
+    return "I am the string interpolation method who binds the method to html template from typescript";
+  }
+constructor() { 
+  setTimeout(()=>{
+     this.status=false;
+  },1000)
+}
+
+  ngOnInit(): void {}
+
+}
+```
+
+## Video : 12 Property binding VS String interpolation ##
+
+* When we want to output somethong dynamically from template we must use "String-interpolation" and If we want to change the DOM content of an element , we must go for "Property binding".
+
+* But , We cannot use both the property-binding and string-interpolation together.
+
+## Video : 13 Event binding ##
+
+* Event binding is the process of adding some functionalities to the HTML elements when certain events occured as click,mouseover , onkeypress , etc.
+
+* These events shoul be binded with the HTMl element by  <b style="color:blue"> ( event name ) = " method name () "  </b>
+
+* The method we assigned is need to be described the functionality to a event occured in the template elements in Typescript file.
+
+## Example : ##
+
+* Let us assign a button to a click event with some method which can change the button color text .
+
+* .HTML file :
+
+```javascript
+
+<button 
+class="btn btn-warning"
+(click)="changeColor()"
+>
+Button 
+</button>
+<p> My color is {{ color }} </p>
+```
+
+.Ts file :
+
+```javascript
+  color:string ="red";
+
+  changeColor(){
+    this.color="blue";
+   }
+
+```
+## VIdeo : 14 Passing and using Data with Event binding ( $event ) ##
+
+* Event binding is very important in binding . In this we can get the information on several events with the help of $event.
+
+* By passing the $event as as argument to event in HTML . We can get the possible events available by console it in the method.
+
+* After that we can choose our event according to our need .
+
+
+<img src="images/console.$events.png">
+
+
+## Example : ##
+
+* We can take the values to display in the paragraph from the events .
+
+* Let us write the event like below:
+
+```javascript
+  para :string ='';
+onShow( event : any ){
+   this.para = (<HTMLInputElement>event.target).value;   // To access the correct value from the DOM.
+}
+```
+* We can bind the event with the HTML like below :
+
+```javascript
+<input
+type="text"
+class="form-control"
+(input)="onShow($event)"
+/>
+<p> {{ para }}</p>
+```
+
+<img src="images/events.png">
+
+
+## Video : 15 Two-way databinding ##
+
+* Two-way data binding is the process of binding the value from both ends with the help of directives.
+
+* We must use the ([ ])=" property name " --> to two way binding.
+
+* It is simply like getting data from user and stores in a variable and utilize it for furthuer references.
+
+* ngModel --> The one of the most frequently used directive in formsModule.
+
+* We should have imported the FormsModule from angular form in the imports section and app.module.ts file.
+
+* .html 
+
+``Javascript
+<input 
+type="text"
+class="form-control"
+[(ngModel)]="content"
+/>
+
+<p>{{ content }}</p>
+```
+
+* .ts file :
+
+```javascript
+content ='vijay';
+```
+
+## Video : 16 Combining all forms of data-binding ##
+
+* Here we can set an assignment to us .
+
+* We must create an input field and a button.
+
+* By clicking button the value which is obtained from the input filed must be displayed and the button must be enable only a 2 seconds when the page gets loaded.
+
+## Video : 17 Directives ##
+
+* Directives are Instructions in the DOM ( Document Object Model ).
+
+* EXAMPLE :
+
+  * components --> Components are also directives with templates which tells the component to locate in particular place .
+
+* ngIF and more and more...
+
+## Video : 18 Using ngIf to output data conditionally ##
+
+* *ngIf is the directive which acts like a normal if class .
+
+* It is structural directive which structures the DOM .
+
+* It should be used in elements attribute with an expression / variable / method that should return either true or false.
+
+* According to the value it determines wheather the element need to be displayed or not.
+
+* For example , ` <p *ngIf="false"> It will not show </p> `
+
+## Video : 19 Enhancing ngIf with an else condition ##
+
+* The else condition can be implemented if the value returns false in the angular element attribute.
+
+* To achieve this , we could make use of locators in html <ng-template> < #locatorName ></> </ng-template>
+
+* This portion will be displayed if the given condition is not satisfied.
+
+```javascript
+
+<p> Your name is :<span *ngIf="select; else notClicked"> {{ yourName }}     </span>
+</p>
+
+<ng-template #notClicked>
+<p>Button is not clicked </p>
+</ng-template>
+```
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-directives',
+  templateUrl: './directives.component.html',
+  styleUrls: ['./directives.component.css']
+})
+export class DirectivesComponent implements OnInit {
+
+  yourName:String='';
+  select=false;
+
+  display(){
+    this.select=true;
+  }
+
+  constructor() { }
+
+  ngOnInit(): void {
+   
+    
+  }
+
+}
+
+```

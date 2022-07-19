@@ -1,0 +1,125 @@
+<h3> Data Binding </h3>
+<br>
+
+<h4> 1 ) String interpolation </h4>
+
+<p> String interpolation is the simple data-binding which is used to pass the data dynamically from typescript to template ( HTML ).
+
+     In string interpolation , all data are converted to strinng in the end .
+</p>
+
+<p> EXAMPLE : I am going to explain data-binding type : {{ type }} which is {{ name }} </p>
+
+<p> EXAMPLE : {{ getStringInterpolation() }}</p>
+<hr>
+
+<h4> 2 )  property Binding  </h4>
+<p> Property binding is used to connect the attributes of an HTML element to the typescript file ( .TS file ).
+
+ The property-binding method changes the DOM ( Document Object Model ) of the specified html element.</p>
+
+<button
+ class="btn btn-success"
+ [disabled]="status"  
+> Disable me </button>
+<p
+[innerText]="status"
+></p>
+
+<br>
+<hr>
+
+<h4> 3 ) Event binding </h4>
+
+<p> Event binding is the process of adding some functionalities to the HTML elements when certain events occured as click,mouseover , onkeypress , etc.
+    These events shoul be binded with the HTMl element by  <b style="color:blue"> ( event name ) = " method name () "  </b>The method we assigned is need to be described the functionality to a event occured in the template elements in Typescript file.</p>
+
+<p> Example : </p>
+
+<button 
+class="btn btn-warning"
+(click)="changeColor()"
+>
+Button 
+</button>
+<p> My color is {{ color }} </p>
+
+<h4> Event binding with $event </h4>
+
+<label> Event binding with $event : </label>
+<input 
+type="text"
+class="form-control"
+(input)="demoShowEvents($event)"
+/>
+
+<br>
+
+<input
+type="text"
+class="form-control"
+(input)="onShow($event)"
+/>
+<p> {{ para }}</p>
+
+<hr>
+
+<h3> 4 ) Two way binding </h3>
+
+<p> Two-way data binding is the process of binding the value from both ends with the help of directives.
+ We must use the ([ ])=" property name " --> to two way binding.
+ It is simply like getting data from user and stores in a variable and utilize it for furthuer references.
+</p>
+
+<input 
+type="text"
+class="form-control"
+[(ngModel)]="content"
+/>
+
+<p>{{ content }}</p>
+
+<hr>
+
+<h3>Combining all forms of data-binding </h3>
+
+<input
+type="text"
+class="form-control"
+(input)="getValue($event)"
+/>
+
+<button 
+class="btn btn-warning"
+[disabled]="disable"
+(click)="submitInput()"
+>submit</button>
+
+<p> The final result is : {{ result }} </p>
+
+<hr>
+
+<h3> Assignment to do </h3>
+
+<label> Enter Your userName : </label>
+<input
+type="text"
+class="form-control"
+[(ngModel)]="userName"
+
+/>
+
+<p> {{ userName }}</p>
+
+<button
+[disabled]="userName==='' "
+class="btn btn-info"
+(click)="reset()"
+> Submit </button>
+
+
+<br>
+<br>
+<br>
+<br>
+

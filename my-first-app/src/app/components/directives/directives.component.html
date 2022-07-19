@@ -1,0 +1,19 @@
+<label> Enter your name : </label>
+<input 
+type="text"
+class="form-control"
+[(ngModel)]="yourName"
+/>
+
+<button
+class="btn btn-primary mt-1"
+(click)="display()"
+>Submit</button>
+
+
+<p> Your name is :<span *ngIf="select; else notClicked"> {{ yourName }}     </span>
+</p>
+
+<ng-template #notClicked>
+<p>Button is not clicked </p>
+</ng-template>
