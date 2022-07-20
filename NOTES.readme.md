@@ -1124,3 +1124,48 @@ export class DirectivesComponent implements OnInit {
 }
 
 ```
+
+## Video : 20 Styling elements dynamically with ngStyle ##
+
+* ngStyle --> It is not the structural directives like ngIf . It is an attribute directive which only changes the element's position. It will not control the element's presence like structural directives.
+
+* we should use the directive in an element with property binding to configure the styling .
+
+* It dynamically updates the style.
+
+* <p [ngStyle]="{ background-color : black ;}">  </p> OR
+
+* <p  [ngStyle]="{backgroundColor : 'black' }"></p>  OR
+
+* <p [ngStyle]="getcolor()"></p>  
+
+## Video : 21 Applying CSS classes dynamically with ngClass ##
+
+* ngClass allows us to create or remove styles dynamically .
+
+* It is also acts like a ngIf , if the certain condition is true only , the style will be applied otherwise the style will not apply to elemnt.
+
+* <h1 [ngClass]="{ className : variable === true OR condition }"></h1>
+
+## Video : 22 Outputting lists with ngFor ##
+
+* The syntax is *ngFor="let variable_name of array_name"
+
+* For example , <p *ngFor="let name of names">jchgsdty</p>
+
+* The array will be in typesscript file .
+
+## Video : 23 Getting the index when using ngFor ##
+
+* We can identify the index value in for loop.
+
+* Syntax:
+
+* <div *ngFor="let variable_name of array_name ; let index_variable_name = index" >
+....
+</div>
+
+
+* We can control the each items with the index value.
+
+## Notes while making application ## 

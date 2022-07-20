@@ -17,3 +17,51 @@ class="btn btn-primary mt-1"
 <ng-template #notClicked>
 <p>Button is not clicked </p>
 </ng-template>
+
+<h3> ng Style </h3>
+
+<p > I am a paragraph {{ name }} </p>
+<p [ngClass]="{para: name !== 'vijay'}"> Hi guys svsghkj </p>
+<p [ngClass]="{para: name === 'vijay'}"> Hi guys svsghkj </p>
+
+<h3> *ngFor </h3>
+
+<h6 *ngFor="let name of names">I am looping ...</h6>
+
+<!-- <h3> Assignment </h3>
+
+<button
+class="btn btn-success"
+(click)="check = !check"
+> Display Details </button>
+
+<button
+class="btn btn-success"
+(click)="showData()"
+> Display Details </button>
+
+
+<p *ngIf="check"> I love =  </p>
+<div *ngFor="let like of likes"
+[ngStyle]="{backgroundColor: like >=5 ? 'yellow' : 'transperant'}"
+[ngClass]="{'white-text': like>=5}"
+> {{ like }}
+</div> -->
+
+
+<h3> ngFor with index </h3>
+
+<button
+class="btn btn-secondary"
+(click)="showDate()"
+> Display </button>
+
+<p *ngIf="check1"> hi  i am  </p>
+
+<div *ngFor="let date of dates; let i = index"
+[ngStyle]="{color: i>=1 ? 'red' : 'yellow'}"
+>
+
+    {{ date }}
+
+</div>
