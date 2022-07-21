@@ -1,9 +1,9 @@
-<div class="container">
+<!-- <div class="container">
     <div class="row">
      <div class="clo-xs-12">
         <h1 class="h1">Hi It's your tasks in components </h1>
         <hr>
-        <!-- <ol>
+        <ol>
             <li> Create two new components mannually and with angular cli  ( Warning alert and  Success alert ) </li>
             <li> Output them beneath each other in the AppComponent </li>
             <li> Output a warning or success message in components </li>
@@ -13,12 +13,27 @@
         <div >Solutions :
             <app-warning></app-warning>
             <app-success></app-success>
-         </div> -->
+         </div> 
 
-       <!-- <app-data-binding></app-data-binding> -->
+        <app-data-binding></app-data-binding>
        <app-directives></app-directives>
        
       </div>
    
+    </div>
+</div> -->
+
+<div class="container">
+   <app-cockpit 
+   (serverCreated)="onServerAdded($event)"
+   (blueprintCreated)="onBlueprintAdded($event)"
+   ></app-cockpit>
+    <hr>
+    <div class="row">
+        <div class="col-xs-12">
+          <app-server-element  *ngFor="let serverElement of serverElements"
+          [srvElement]="serverElement"
+          ></app-server-element>
+        </div>
     </div>
 </div>

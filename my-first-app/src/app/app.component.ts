@@ -9,4 +9,26 @@ import { bufferToggle } from 'rxjs';
 })
 export class AppComponent {
   title = 'vijay';
+ 
+  serverElements = [ { type:'server',name : 'testderver' , content : 'Just a test' } ];
+
+  onServerAdded( serverData:{ serverName:string , serverContent:string } ){
+    this.serverElements.push({
+      type:'server',
+      name:serverData.serverName,
+      content:serverData.serverContent,
+    })
+
+  }
+
+  onBlueprintAdded( serverData :{ blueprintName:string , blueprintContent:string }){
+    this.serverElements.push({
+      type:'blueprint',
+      name:serverData.blueprintName,
+      content:serverData.blueprintContent,
+    })
+
+  }
+
+
 }

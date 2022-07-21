@@ -7,6 +7,8 @@ import { SuccessComponent } from './components/success/success.component';
 import { DataBindingComponent } from './components/data-binding/data-binding.component';
 import { FormsModule } from '@angular/forms';
 import { DirectivesComponent } from './components/directives/directives.component';
+import { CockpitComponent } from './componentInteraction/cockpit/cockpit.component';
+import { ServerElementComponent } from './componentInteraction/server-element/server-element.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +17,9 @@ import { DirectivesComponent } from './components/directives/directives.componen
     SuccessComponent,
     DataBindingComponent,
     DirectivesComponent,
+    CockpitComponent,
+    ServerElementComponent,
+  
   ],
   imports: [
     BrowserModule,

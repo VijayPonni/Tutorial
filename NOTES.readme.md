@@ -1169,3 +1169,40 @@ export class DirectivesComponent implements OnInit {
 * We can control the each items with the index value.
 
 ## Notes while making application ## 
+
+## Model ##
+
+* Model is just a typescript file.
+ 
+* There is no decorartor for model.
+
+* It is used to collect the data and store it as blueprint for later use in another component( app.component.ts ) .
+
+
+## Debugging Code ##
+
+* Read error message carefully.
+
+* If the error is not shown and something is not working then , there is a possibility of logical error.
+  To get rid of this , we can go for dev-tools in browser.In the sources part we can run our application 
+  with beakponit where we are able to identify the mistake we had done.
+
+* Augury angular - Install this tool from browser to get better understanding of our angular project with   
+  graphical illustration . 
+
+
+# Section 5 : Understanding component interaction and data Bindiing #
+
+## @Input() decorator ##
+
+* @Input() decorator is used to bind the the property/variable of one component in any component which requires the 
+   property or value.
+
+* It must be imported from angular/core library file.
+
+## @Input(' ... ') ##
+
+* We can also pass name as an argument which we want to use in anothercomponent.
+
+* If we pass a name in @Input() decorator in one component , we can utilize it the name to binding it
+  in other component.
