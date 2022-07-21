@@ -1133,11 +1133,14 @@ export class DirectivesComponent implements OnInit {
 
 * It dynamically updates the style.
 
-* <p [ngStyle]="{ background-color : black ;}">  </p> OR
+```javascript
+ <p [ngStyle]="{ background-color : black ;}">  </p> OR
 
-* <p  [ngStyle]="{backgroundColor : 'black' }"></p>  OR
+ <p  [ngStyle]="{backgroundColor : 'black' }"></p>  OR
 
-* <p [ngStyle]="getcolor()"></p>  
+ <p [ngStyle]="getcolor()"></p> 
+
+ ``` 
 
 ## Video : 21 Applying CSS classes dynamically with ngClass ##
 
@@ -1145,13 +1148,23 @@ export class DirectivesComponent implements OnInit {
 
 * It is also acts like a ngIf , if the certain condition is true only , the style will be applied otherwise the style will not apply to elemnt.
 
+```javascript
+
 * <h1 [ngClass]="{ className : variable === true OR condition }"></h1>
+
+```
+
 
 ## Video : 22 Outputting lists with ngFor ##
 
 * The syntax is *ngFor="let variable_name of array_name"
 
-* For example , <p *ngFor="let name of names">jchgsdty</p>
+* For example ,
+
+```javascript
+ <p *ngFor="let name of names">jchgsdty</p>
+
+```
 
 * The array will be in typesscript file .
 
@@ -1161,10 +1174,13 @@ export class DirectivesComponent implements OnInit {
 
 * Syntax:
 
-* <div *ngFor="let variable_name of array_name ; let index_variable_name = index" >
+```javascript
+
+ <div *ngFor="let variable_name of array_name ; let index_variable_name = index" >
 ....
 </div>
 
+```
 
 * We can control the each items with the index value.
 
