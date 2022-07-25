@@ -1,13 +1,58 @@
 <div class="row">
     <div class="col-xs-12">
         <p> Add new servers or Blueprints </p>
+
         <label for=""> Server Name </label>
-        <input type="text" class="form-control" [(ngModel)]="newServerName">
-        <label for="">BluePrint Name </label>
-        <input type="text" class="form-control"[(ngModel)]="newServerContent">
+
+                    <!-- 1.databinding method -->
+        <!-- <input type="text" class="form-control" [(ngModel)]="newServerName">   -->
+        
+                      <!-- 2. local reference with event   it is same for 3.local reference with viewChile() -->
+      
+        <input 
+        type="text" 
+        class="form-control"
+        #serverNameInput
+        >
+        
+   
+        
+        <label for=""> Server Content  </label>
+
+ 
+                         <!-- 1.databinding method  -->
+        <!-- <input type="text" class="form-control"[(ngModel)]="newServerContent"> -->
+
+                      <!--2. local reference with event  it is same for 3.local reference with viewChile() -->
+        
+
+        <input
+         type="text"
+          class="form-control"
+          #serverContentInput
+          >
+  
+    
         <br>
-        <button class="btn btn-primary" (click)="onAddServer()"> Add server </button>
-      <button class="btn btn-primary" (click)="onAddBlueprint()"> Add server BluePrint </button>
+
+                    <!-- 1.databinding method -->
+
+        <!-- <button class="btn btn-primary" (click)="onAddServer()"> Add server</button>
+        <button class="btn btn-primary" (click)="onAddBlueprint()"> Add server BluePrint </button> -->
+
+
+                      <!--2. local reference with event   -->
+
+        <!-- <button class="btn btn-primary" (click)="onAddServer(serverNameInput)"> Add Server </button>
+        <button class="btn btn-primary" (click)="onAddBlueprint(serverNameInput)"> Add Server Blue Print </button> -->
+
+
+                         <!-- 3/local reference with viewchild -->
+                         
+      <button class="btn btn-primary" (click) = "onAddServer()"> Add server </button>
+      <button class="btn btn-primary" (click) = "onAddBlueprint()"> Add Server Blue Print </button>
+
+
     </div>
 </div>
 

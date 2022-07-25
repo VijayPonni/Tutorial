@@ -1222,3 +1222,57 @@ export class DirectivesComponent implements OnInit {
 
 * If we pass a name in @Input() decorator in one component , we can utilize it the name to binding it
   in other component.
+
+## Local references ##
+
+* Local references are very useful and easy to get value from the element and connect to typescript especially
+  in input field.
+
+* We can use it in any elements .
+
+* But it is only accessable in template(HTML) . If we want to access it in typescript file , we need to pass his
+  an argument in any method.
+
+* Otherwise , we can access the elements properties with ViewChild method in typescript directly.
+
+* We can access all properties attached with the element in typescript .
+
+
+##  ng-content ##
+
+* This is an atribute which is used to connect two components while parent component needs to add extra content with open and closing tag of it.If So , we need to provide the  
+
+```javascript 
+<ng-content></ng-content> 
+```
+
+in child component.
+
+
+# Component life cycle hooks #
+
+* Every angular component contains phases of executing the component when it is initiated . 
+
+* The life-cycle hooks decides the order of phase that means which method is executable first and next and so on.
+
+* By implementing the life cycle hook methods in our component will help us to control the flow of our component.
+
+* The very important life-cycle methods are listed below:
+
+  * ngOnChanges           --> Called after a bound input property changes.
+
+  * ngOnInit              --> Called when the compoennt in initialized,
+
+  * ngDoCheck             --> Called during every change detection run.
+
+  * ngAfterContentInit    -->  Called after content (ng0-content) has been projected into views.
+
+  * ngAfterContentChecked --> Called everytime the projected content has been checked.
+
+  * ngAfterViewInit       -->  Called after the componen's view ( and child views )  has been initialized.
+
+  * ngafterViewChecked    --> Called everytime the view ( and child view ) has been checked.
+
+  * ngOnDestroy           --> Called once the component is about to be destroyed.
+
+
