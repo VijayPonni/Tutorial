@@ -1392,3 +1392,122 @@ export class RenderHighlighDirective implements OnInit {
 
   }
 ```
+# Services #
+
+* Services are centralizd code or class that helps to duplication of code and Data storage among the components.
+
+* It is basically a Normal Typescript Class which contaiins methods or data incommon for all components.
+
+## Using services in different ways : ##
+
+* We can make use of services class in differnet ways :
+
+  * 1 --> Creating Instances .
+
+  * 2 --> Hierarchial Injector .
+
+### Creating Instance method  ###  
+
+* We can make use of the class by simply creating instance in the required components as below : 
+
+* Servicefile:
+
+```javascript
+
+export class LoggingService{
+    logStatusChange(status:string){
+  console.log("A server staus Changed , new Staus : " + status);
+   
+    }
+}
+```
+
+* This is the simple method which logs some data in console .  
+
+* We need to use this method in two differnt Components. For that we should do the following:
+
+  * import the services class to our component.
+
+  * Create instance with new keyword and assign it to another variable.
+
+  * Using the variable , we can call the methd .
+
+```javascript
+.
+.
+.
+  import { LoggingService } from '../logging.services';
+.
+.
+.
+const variable = new LoggingService();
+variable.logStatusChange(accountStatus);
+
+```
+* It works as same as consoling directly in all other compponents ( We should create instance in every components to use the service ).
+
+* But we should not use this method because angular provides inject method which is more comfortable for complex application.
+
+
+### Heirarchial Injector method ###
+
+* Heirarchial injector is also known as dependncy injection which means that a particular class is depend on another class or method.
+
+* In this method the instanec process is carried out by the angular itself . To initiate that , we should make somethings in component where we need to to use the services .
+
+* Fisrt In the component , we must initialice constructor function and in that constructor we should define the variabke with service class.
+
+* And then , we must import it .
+
+* And most importantly , we must provide the providers array in the component's decorator to make the angular to create the instance.Otherwise it will show error.
+
+* These are the things we need to do to instantiate our service in our component.
+
+* After instantiating , we need to use the variable to accedd the method in service in required place .
+
+```javascript
+.
+.
+.
+import { LoggingService  } from '../logging.services';
+.
+.
+.
+@Component({
+  selector: 'app-account',
+  templateUrl: './account.component.html',
+  styleUrls: ['./account.component.css'],
+  providers:[LoggingService]
+})
+.
+.
+.
+  constructor(public variabel : LoggingService) { }
+.
+.
+.
+  this.variabel.logStatusChange(status);
+.
+.
+.
+
+```
+### Heirarchial Quality ###
+
+* Using services in components will follow heirarchy ( Order ) to use the instances .
+
+* For Example , We shoul use the instance of parent component to the child component also.
+
+* It is like a tree format where the flow is only downwards not in upwards which means , we cannot use any child component's instance to it's parent.
+
+## Services inServices / @Injectable ##
+
+* We can use the services in component,directive or whatever which contains the decorartor.
+
+* But service is just a typescript file and does not contain any decorator . So , inorder to make communication between tow service files , we want to have special decorator called @Injectable .
+which should be import from angular/core.
+
+* We should provide the @Injectable decorator in both sending and receiving services typescript files.Otherwise , it will show error.
+
+* NOTE : Make sure that all services are in app.module.ts providers array.
+
