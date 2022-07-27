@@ -1275,4 +1275,120 @@ in child component.
 
   * ngOnDestroy           --> Called once the component is about to be destroyed.
 
+# Attribute and Structural Directives #
 
+## Attribute Directive ##
+
+* Looking like a normal HTML attribute ( Possibly with databinding or eventBinding ).
+
+* Only change/affect the element that they are added to.
+
+
+## Structural Directive ##
+
+* Looklike a normal HTML attribute but have a leading *(desugauring / principally )
+
+* Affects whole area in the DOM ( Elements get added/removed ).
+
+## Use Attribute directive from outside of template ##
+
+* We can create a seperate typescript file with extension called directive.ts or we can generate through the angular cli by below command :
+
+```javascript
+
+ng g d directive-name
+
+```
+* We can access the DOM elements by binding the selector of this typescript with any DOM element which we want to access.
+
+* This element shoul be obtained with Elementref datatype in directive and functionality is also implemented in directive .
+
+```javascript
+import { Directive , ElementRef, OnInit } from "@angular/core";
+
+@Directive({
+    selector:'[appBasicHighlight]',
+})
+
+export class BasicHighlightDirective implements OnInit{
+    constructor( private elementref : ElementRef){
+
+    }
+
+    ngOnInit(){
+        this.elementref.nativeElement.style.backgroundColor='Orange';
+        this.elementref.nativeElement.style.fontSize="30px";
+    }
+
+}
+```
+
+* We can simply bind the selector with DOM element like below:
+
+```javascript
+      <p appBasicHighlight> HERE is the para which is done with directive </p>
+
+```
+
+## Renderer directive  ##
+
+* renderer directive method is merely similar to  above method.
+
+* But , renderer method is considered to be better than that because it helps to access the DOM elements even in the services where we are unable to get the DOM elements connecton directly.
+
+```javascript
+import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
+
+@Directive({
+  selector: '[appRenderHighligh]'
+})
+export class RenderHighlighDirective implements OnInit {
+
+  constructor(private elementRef:ElementRef,private renderer:Renderer2) { }
+
+  ngOnInit(){
+  this.renderer.setStyle(this.elementRef.nativeElement,'backgroundColor','green');
+  this.renderer.setStyle(this.elementRef.nativeElement,'fontSize','50px');
+
+  }
+
+}
+```
+* We can simply bind the selector with DOM element like below:
+
+```javascript
+           <p appRenderHighligh>It is a  para which uses the renderer directive </p>
+
+```
+
+## HostListener events ##
+
+* @HostListener is the imporatne decorator from angular/core library which is used to control several events in directive .
+
+* We can use this to add some functionality to our DOM element.
+
+```javascript
+
+    @HostListener('mouseenter') moouse(){
+   this.elementref.nativeElement.style.color="yellow";
+    }
+```
+* There are many library events availabe in HostListener , we mostly use "click" , "mouseenter" , "mouseleave"
+
+## @HostBinding events ##
+
+* HostBinding is another decorator which simplifies the DOM access even more easier like below:
+
+```javascript
+  @HostBinding('style.backgroundColor') backgroundColor:string='green';
+
+  @HostListener('mouseenter') mouseenter(){
+    this.elementRef.nativeElement.style.backgroundColor='blue';
+    this.elementRef.nativeElement.style.fontSize='40px'
+  }
+  @HostListener('mouseleave') mouseleave(){
+    this.elementRef.nativeElement.style.backgroundColor='green';
+    this.elementRef.nativeElement.style.fontSize='25px'
+
+  }
+```

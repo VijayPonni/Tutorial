@@ -1,0 +1,63 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <button class="btn btn-primary"
+      (click)="onlyOdd = !onlyOdd"
+      >
+        Only Show odd Numbers ! 
+      </button>
+
+      <br>
+      <br>
+      <ul class="list-group">
+   
+      <!-- <div *ngIf="onlyOdd===true">
+        <li
+        class="list-group-item"
+        [ngClass]="{ addClass : odd === 1 }"
+        [ngStyle]="{backgroundColor: odd ===1 ? 'blue' : 'lightblue'}"
+         *ngFor="let odd of oddArray">
+          {{ odd }}
+        </li>
+      </div>
+
+      <div *ngIf="onlyOdd===false" >
+        <li 
+        class="list-group-item"
+        [ngStyle]="{backgroundColor : even===2 ? 'red' : 'brown'}"
+
+        *ngFor="let even of evenArray">
+          {{ even }}
+        </li>
+      </div>
+      -->
+      <div *appUnless="onlyOdd">
+        <li
+        class="list-group-item"
+        [ngClass]="{ addClass : odd === 1 }"
+        [ngStyle]="{backgroundColor: odd ===1 ? 'blue' : 'lightblue'}"
+         *ngFor="let odd of oddArray">
+          {{ odd }}
+        </li>
+      </div>
+      </ul>
+   <br>
+      <p appBasicHighlight> HERE is the para which is done with directive </p>
+      <br>
+      <p appRenderHighligh
+      [defaultColor]="'yellow'"
+      [highlightColor]="'red'"
+      >It is a  para which uses the renderer directive </p>
+
+      <div [ngSwitch]="value">
+        <p *ngSwitchCase="5">value is 5</p>
+        <p *ngSwitchCase="10">value is 10</p>
+        <p *ngSwitchCase="15">value is 15</p>
+        <p *ngSwitchDefault="5">value is default</p>
+        
+
+      </div>
+
+    </div>
+  </div>
+</div>
