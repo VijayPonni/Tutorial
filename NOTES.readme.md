@@ -1511,3 +1511,281 @@ which should be import from angular/core.
 
 * NOTE : Make sure that all services are in app.module.ts providers array.
 
+# Changing pages with Routing #
+
+* To display particular page as main page in an application or website , we need to do routiing.
+
+* Angular provides Single Page Application ( SPA ) which helps to render one HTML file and loads displays dynamic page contents using the javascript bundles in the background.
+
+* With the help of Routing , we can navigate different pages with unique path setups ( URL's ) but still it is a Single Page Application.
+
+* We have a Domain URl for our application . We can naviagte to other page by adding some path followed by domain name in the browser's URL.
+
+## Navigation by changing the url address  ##
+
+## app.module.ts file ##
+
+### Step : 1  ###
+
+* As Routing is responsible for the whole application , we need to do our procedure in our app.module.ts which acts as the leader of the angular application.
+
+* To setup routing , first need to declare a variable of type <b> Routes </b> .
+
+* It should ba an array format.
+
+* That array need to have javascript objects as elements.
+
+* Each Object element should have two basic properties as default. They are :
+
+ * path : 
+  
+ --> It is the main property that every object element should contain which describes the Url of the loading page.
+
+ --> For example , the domain url is localHost:4200 , we want to load the sample page as main in application and also wants to set the URL to localHost:4200/sample , we need to set the path property value to 'sample'
+
+ --> { path : 'sample' ,  }   //  URL : localhost:4200/sample 
+ 
+* Componet :
+
+--> It is teh another main property to choose which page need to be displayed.
+
+--> For exapmle , the sample component is need to be displayed in the path localhost:4200/sample , then we should give the value as SampleComponent
+
+--> { path : 'sample' , Component : SampleCompoent }
+
+### Example : app.module.ts ###
+
+
+```javascript
+
+import { Routes } from '@angular/router';
+
+.
+.
+.
+
+
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'user' , component : UserComponent } ,
+  { path : 'server' , component : ServerComponent } ,
+  
+];
+
+.
+.
+.
+
+```
+
+* NOTE : This alone will not do anything.
+
+### Step : 2 ###
+
+* we have set pathe for our components but stil now , we didn't use the variable to actvate it .
+
+* To make use of the variabe , we need to import the RouterModule which is also belonged to @angulat/router .
+
+* In the @NgModule decorator within the imports section , we should import the Routermodule with it's specific method forRoot()
+
+* We should pass the variable which we created for our path selection as an arguments to the forRoot() method as below to register our routing path.
+
+```javascript
+
+import { RouterModule, Routes } from '@angular/router';
+
+.
+.
+.
+
+@NgModule({
+  declarations: [
+.
+.
+.
+
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'user' , component : UserComponent } ,
+  { path : 'server' , component : ServerComponent } ,
+  
+];
+
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)   //Adding the variable in RouterModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+
+
+
+```
+## app.component.html ##
+
+## Choose where to display the page with " router-outlet " directive ##
+
+* We have regitered our Routes in the app.module.ts file but we must choose where to display the pages .
+
+* The first page is displayed by angular application is app.component.html . So We need to use the <router-outlet></router-outlet> decorator to view the exact pages.
+
+```javascript
+.
+.
+.
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+       <router-outlet></router-outlet>
+    </div>
+  </div>
+  .
+  .
+  .
+
+```
+
+### NOTE : We can only navigate between pages by changing the url only not by clicking option ###
+
+## Navigation using clicking a link ##
+
+* By changing the url address we can navigate between our pages but that is not efficient way to do it.
+
+* We should provide the navigation links to the user to navigate between multiple pages .
+
+* Inorder to do this , we should follow the same procedure in the last method but the one thing we should add is  setting the navigation links with our Routes.
+
+* We can achieve it by simply setting the anchor tag's href="#" to the router path like below in app.component.html
+
+```javascript
+.
+.
+.
+    <ul class="nav nav-tabs">
+        <li role="presentation" class="active nav-item"><a href="/" class="nav-link"> Home </a></li>
+        <li role="Presentation" class="nav-item"><a href="/server" class="nav-link"> Servers </a></li>
+        <li role="Presentation" class="nav-item"><a href="/user" class="nav-link"> Users </a></li>
+      </ul>
+.
+.
+.
+       <router-outlet></router-outlet>
+.
+.
+
+```
+### NOTE : But this method is not good as it reloads every time we click the link . we should avoid this. ###
+
+## Using routerlink attribute in links to navigate  ##
+
+* Angular provides specific directive to avoid the reloading of application everytime we click a link to navigate between pages .
+
+* The ddirective is native-link as an attribute to the anchor tag which alternates the href as below :
+
+```javascript
+.
+.
+.
+        <ul class="nav nav-tabs">
+        <li role="presentation" class="active nav-item"><a routerLink="/" class="nav-link"> Home </a></li>
+        <li role="Presentation" class="nav-item"><a routerLink="/server" class="nav-link"> Servers </a></li>
+        <li role="Presentation" class="nav-item"><a routerLink="/user" class="nav-link"> Users </a></li>
+      </ul>
+.
+.
+.
+       <router-outlet></router-outlet>
+.
+.
+
+```
+
+### NOTE : This works fine as expected (i.e) we can navigate between pages by clicking links without reloading our application ###
+
+## MArkin active router link ##
+
+* We can specify the active router link with routerlinkActive attribute as follows .
+
+* By setting the default home page link with [routerLinkActiceOptions]="exact:true"  , we can get rid of collapse of active the deafault page .
+
+```javascript
+      <ul class="nav nav-tabs">
+
+        <li role="presentation" class="nav-item"> 
+          <a 
+          routerLink="/" 
+           class="nav-link" 
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact : true }"
+           > Home </a>
+          </li>
+
+        <li role="Presentation" class="nav-item" >
+          <a 
+          routerLink="/server" 
+          class="nav-link" 
+          routerLinkActive="active"
+          > Servers </a>
+        </li>
+
+        <li role="Presentation" class="nav-item">
+          <a routerLink="/user"
+           class="nav-link"
+            routerLinkActive="active"
+            > Users </a>
+          </li>
+
+      </ul>
+```
+
+## Programatic rouing ##
+
+* We can route to another component by clicking a button or particular action is getting completed.
+
+* This is done with typescript file .
+
+* We need to initialize the method to trigger it .
+
+* .html ( Triggering an event )
+
+```javascript
+.
+.
+.
+
+<button class="btn btn-primary" (click)="onLoadServers()"> Load Servers </button>
+
+.
+.
+.
+
+
+```
+
+* .ts file ( process the navigation with Router )
+
+```javascript
+import { Router } from '@angular/router';
+
+.
+.
+.
+  constructor(private route : Router) { }
+
+.
+.
+.
+
+  onLoadServers(){
+    //spme process may be ..
+    this.route.navigate(['/server']);   //route to particular path 
+    
+  }
+  .
+  .
+  .
+
+```
+
