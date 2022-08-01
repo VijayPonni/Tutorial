@@ -7,12 +7,15 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { ServerComponent } from './servers/server/server.component';
 import { EditServerComponent } from './servers/edit-server/edit-server.component';
+import { UsersComponent } from './users/users.component';
 import { UserComponent } from './users/user/user.component';
 
 const appRoutes : Routes = [
   { path : '' , component : HomeComponent } ,
-  { path : 'user' , component : UserComponent } ,
-  { path : 'server' , component : ServerComponent } ,
+  { path : 'users' , component : UsersComponent } ,
+  { path : 'users/:id/:name' , component : UserComponent } ,
+  { path : 'servers' , component : ServerComponent } ,
+  { path : 'servers/:id/edit' , component : EditServerComponent  }
   
 ];
 
@@ -22,6 +25,7 @@ const appRoutes : Routes = [
     HomeComponent,
     ServerComponent,
     EditServerComponent,
+    UsersComponent,
     UserComponent
   ],
   imports: [

@@ -14,9 +14,9 @@ export class HomeComponent implements OnInit {
   }
 
 
-  onLoadServers(){
+  onLoadServer(id : number){
     //spme process may be ..
-    this.route.navigate(['/server']);   //route to particular path 
+    this.route.navigate( ['/servers', id , 'edit'] , { queryParams : { allowedit : '1'}  ,  fragment : 'loading'});   //route to particular path 
     
   }
 }

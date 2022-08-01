@@ -1,1 +1,7 @@
-<p>user works!</p>
+<p>User with ID {{ user.id }} </p>
+<p>User name is {{ user.name }} </p>
+
+<hr>
+
+<a [routerLink]="['/users/',3,'meera']">Meera Id 3</a> 
+<!-- Here we should pass the routerlink with parameters id and name -->

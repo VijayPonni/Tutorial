@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-server',
@@ -9,9 +10,17 @@ export class ServerComponent implements OnInit {
 
   servers = ['vijay' , 'ajith' , 'surya']; 
 
-  constructor() { }
+  constructor( private router : Router ,
+               private relative : ActivatedRoute   // To get the current Active path
+               ) { }
 
   ngOnInit(): void {
   }
+
+  onReload(){
+    this.router.navigate(['server']  ,{ relativeTo: this.relative});   // Use the variable to decide the navigation path
+
+  }
+
 
 }

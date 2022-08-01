@@ -1788,4 +1788,245 @@ import { Router } from '@angular/router';
   .
 
 ```
+## Routing with relative path ##
+
+* We can still identify the current acyive path and set our navigate path acording to it .
+
+* To get the current active routing path in navigate method , we should do add twothings in above code .
+
+```javascript
+.
+.
+.
+
+  constructor( private router : Router ,
+               private relative : ActivatedRoute   // To get the current Active path
+               ) { }
+
+  ngOnInit(): void {
+  }
+
+  onReload(){
+    this.router.navigate(['server']  ,{ relativeTo: this.relative});   // Use the variable to decide the navigation path
+
+  }
+.
+.
+.
+
+```
+
+# Dynamic Path Segmentation By changing URL / Passing parameters to Route   #
+
+* We can navigate to another pages with dynamic data provided in the path segmentation as below :
+
+* app.module.ts
+
+```javascript
+.
+.
+{ path : 'users' , component : UsersComponent } ,     // It is parent
+
+{ path : 'users/:id' , component : UserComponent } ,    // loading other component with dynamic 
+.
+.
+
+```
+* We can see the content of user component by changing the URL with any data 
+
+<img src="images/dynamic_page_routing.png">
+
+
+# Fetching Route Parameters #
+
+* We have passed some parameters in routing path and fetched the component in the screen by changing the URL .
+
+* But , to get the data in our component . we need to access the params in our child component.
+
+```javascript
+
+export class UserComponent implements OnInit {
+
+  user! : { id: number , name : string}
+
+  constructor(private route : ActivatedRoute) { }    // It gives the currently active route that means id 
+  
+  ngOnInit(): void {
+
+    this.user = {
+      id:     this.route.snapshot.params['id'] ,    // The data passed is given in the path app.module.ts
+      name :  this.route.snapshot.params['name']     
+    }
+
+  }
+
+```
+* Now , we can get the data in the compoent by changing the path and binding the variables to the .html .
+
+# Fetching Route parameters with Router link #
+
+* We can get the data with the help of router link attribute also .
+
+* We can use the routerLink in template of the child component as below :
+
+```javascript
+.
+.
+
+<a [routerLink]="['/users/',3,'meera']">Meera Id 3</a> 
+<!-- Here we should pass the routerlink with parameters id and name -->
+.
+.
+
+```
+
+### NOTE : The URL is changes but the content is not changed accordingly .   ###
+
+## Changing the data also with subscribe method which is belongs to observable  ##
+
+* By providing the RouterLink in template , It gets the data in the path provided and get the url correctlty . 
+
+* But , we only iitiated the data in typescript file by snapshot property . So angular does not reload the page we already in .
+
+* To make the angular to aware the content updatation , we must subscribe to it in typescript .
+
+* <b> Observable  </b>  --> The concept to do asynchrounous task . <b> Params </b> is the Observable property .
+
+                        --> Observable do not wait for some action but executes when it happens .
+
+                        --> Here we don't know when the id and name get changed . So we utilize the 
+                            Observable concept .
+
+* <b >Subscribe </b>    --> Subscribe is the method used to capture the updated data in params by   
+                            passing function as argument .
+
+* typescript file : 
+
+```javascript
+
+  user! : { id: number , name : string}
+
+  constructor(private route : ActivatedRoute) { }    // It gives the currently active route that means id 
+  
+  ngOnInit(): void {
+
+    this.user = {
+      id:     this.route.snapshot.params['id'] ,    // The data passed is given in the path app.module.ts
+      name :  this.route.snapshot.params['name']     
+    }
+  this.route.params.subscribe(
+    (params : Params ) => {                     // To update the data in Template when it updated in real time
+           this.user.id = params['id'];
+           this.user.name = params['name'];
+    }
+  );
+
+  }
+
+``` 
+
+# Unsubscribing to Observable subscription #
+
+* When we create subscription to update the data in using Params the subscription will not get releive even the component is destroyed .
+
+* So we need to Unsubscribe this .
+
+* To unsubscribe this , we need to initialize a variable of type Subscription that is imported from 'rxjs' .
+
+* We need to assign it to the function where we subscribe in ngOninit()  .
+
+* In ngOndestroy() we need to unsubscribe() the variable as below :
+
+```javascript
+.
+.
+.
+
+import { Subscription } from 'rxjs';
+.
+.
+.
+
+
+  paramsSub !: Subscription;
+
+  .
+  .
+  .
+ngOnInit(): void {
+
+
+  this.paramsSub = this.route.params.subscribe(            // Assigning to the method where we subscribe 
+    (params : Params ) => {
+           this.user.id = params['id'];
+           this.user.name = params['name'];
+    }
+  );
+
+  }
+
+  ngOnDestroy(): void {
+    this.paramsSub.unsubscribe();    //Unsubscribe
+  }
+
+}
+
+
+```
+# Query params #
+
+* Query params are extra information provided in the link that follows by ? symbol .
+
+* Fragement is also a information about the currently loaded page in the URL follows by # symbol .
+
+# Query params in RouterLink #
+
+* Make sure that the router link is available in module .
+
+```javascript
+.
+.
+.
+{ path : 'servers/:id/edit' , component : EditServerComponent  }
+.
+.
+.
+```
+* We can add queryParams and fragment in our routerLink parameter as required .
+
+```javascript
+.
+.
+       <a href="#"
+            [routerLink]="['/servers', 5 , 'edit' ]"
+            [queryParams]="{allowEdit : '1'}"          
+            fragment="loading"
+            class="list-group-item"               
+            *ngFor="let server of servers"
+            >
+            {{ server }}
+           </a>
+.
+.
+
+```
+
+* We can also add queryParams in the typescript as required :
+
+```javascript
+.
+.
+.
+  onLoadServer(id : number){
+    //spme process may be ..
+    this.route.navigate( ['/servers', id , 'edit'] , { queryParams : { allowedit : '1'}  ,  fragment : 'loading'});   //route to particular path 
+    
+  }
+.
+.
+.
+
+```
+
+### Note : This is only method of creating queryparams in URL . Not fetching data ###
 
