@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ServersService } from './server.service';
 
 @Component({
   selector: 'app-server',
@@ -8,13 +9,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class ServerComponent implements OnInit {
 
-  servers = ['vijay' , 'ajith' , 'surya']; 
+  servers : {id :number , name :string , status:string}[] = []; 
 
-  constructor( private router : Router ,
+  constructor(
+               private serversService :ServersService,
+               private router : Router ,
                private relative : ActivatedRoute   // To get the current Active path
                ) { }
 
   ngOnInit(): void {
+    this.servers = this.serversService.getServers();
   }
 
   onReload(){

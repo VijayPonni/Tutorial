@@ -2030,3 +2030,736 @@ ngOnInit(): void {
 
 ### Note : This is only method of creating queryparams in URL . Not fetching data ###
 
+# Queryparams and fragments usage in typescript with activated route # 
+
+* There are two ways to use the queryparams and frangemnts . The one is snapshot method and another is subscribe method :
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'app-edit-server',
+  templateUrl: './edit-server.component.html',
+  styleUrls: ['./edit-server.component.css']
+})
+export class EditServerComponent implements OnInit {
+
+  constructor(
+    private router :ActivatedRoute
+  ) { }
+
+  ngOnInit(): void {
+    console.log(this.router.snapshot.queryParams);   // Printing the queryparams of currently active route with snapshot
+    console.log(this.router.snapshot.fragment);      // Printing the fragment of currently active route with snapshot
+
+    this.router.queryParams.subscribe();             // Accessing the queryparams wih subscribe method .
+    this.router.fragment.subscribe();                 // Accessing the fragment wih subscribe method .
+  }
+
+  updateQuery(){
+    console.log(" QueryUpdated successfully !");
+    
+  }
+
+}
+
+```
+* These things will not change anything but we can handle the queryparams like thses methods in typescript .
+
+# Practising some common ethics of navigation #
+
+* This is one of the methods to navigate to another component with the id .
+
+* This method involves seperate component ( Template and TS ) to show the page when partcular link is clicked .
+
+* The link is set with routerLink attribute which consists of routes with specific data path in app.module.TS .
+
+* The typescript of the navigated page should have the specific data with it's own datatype that may be number ( Here id is specific data and that is number ) .
+
+* APP.MODULE.TS :
+
+```javascript
+.
+.
+.
+
+{ path : 'servers' , component : ServerComponent } ,
+{ path : 'servers/:id' , component : SingleServerComponent } ,
+
+.
+.
+.
+
+```
+* singleserver.component.TS :
+
+```javascript
+.
+.
+.
+export class SingleServerComponent implements OnInit {
+
+ server: { id: number; name: string; status: string; } | any;
+
+  constructor(
+    private serversService : ServersService ,
+    private route : ActivatedRoute
+    ) { }
+
+    ngOnInit() {
+      const id = +this.route.snapshot.params['id'];  
+      // Add + symbol to represent type as number because it has been considered as string as the router link is string
+      // If we use without + symbol , it will show error .
+      this.server = this.serversService.getServer(id);
+
+.
+.
+.
+    }
+}
+```
+
+# Setting up nested Routes ( Child Routes ) #
+
+* Nested routing is adding child routing to the parent router instead of creating the brand new component as routing .
+
+* This method reduces the duplication of parent routing and ease understanding of code .
+
+## Implementing child routing process ##
+
+* We should implement child or nested routing in the app.module.ts where we have declared the routing for each components .
+
+* We should identify the parent route and child route to make it nested .
+
+* Below is the app.module.ts BEFORE NESTED ROUTING :
+
+```javascript
+.
+.
+.
+
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'users' , component : UsersComponent } ,
+  { path : 'users/:id/:name' , component : UserComponent } ,
+  { path : 'servers' , component : ServerComponent } ,
+  { path : 'servers/:id' , component : SingleServerComponent } ,
+  { path : 'servers/:id/edit' , component : EditServerComponent  }
+  
+];
+
+.
+.
+.
+
+```
+## 1 : Add children attribute in the parent route ##
+
+* children is the attribute which is used to make nested routes which is of type Array .
+
+* This attribute need to be attached in parent route .
+
+## Example : ##
+
+* In this example , we have servers and users as parent routes .
+
+* users/:id/:name is children for user parent route .
+
+* servers/:id and servers/:id/edit are children of servers parent route .
+
+* So we must add the children attribute in both parent routes as below :
+
+```javascript
+.
+.
+.
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'users' , component : UsersComponent , children : [] } ,
+  { path : 'users/:id/:name' , component : UserComponent } ,
+  { path : 'servers' , component : ServerComponent , children : [] } ,
+  { path : 'servers/:id' , component : SingleServerComponent } ,
+  { path : 'servers/:id/edit' , component : EditServerComponent  }
+  
+];
+.
+.
+.
+
+```
+ 
+## 2 : Pass the children routes as elements to the parent rout's children array [] ##
+
+* We have children attribute as empty array . So we need to give all the children routes or routes we need to nest inside the parent inside the array .
+
+* While giving as elements , we should avoid the parent identification in path attribute of all child routes .
+
+* Because , the children of parent route is itself denotes that they belongs to this parent . So we don't want to mention it again.
+
+## Example : ##
+
+* In our app.module.ts we have inset the child routes inside the children array of parents .
+
+```javascript
+.
+.
+.
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'users' , component : UsersComponent , children : [
+     { path : ':id/:name' , component : UserComponent } 
+  ] } ,
+  { path : 'servers' , component : ServerComponent , children : [
+    { path : ':id' , component : SingleServerComponent } ,
+    { path : ':id/edit' , component : EditServerComponent  }
+  ] } 
+ 
+];
+.
+.
+.
+```
+## 3 : Loading child routes with router-outlet ##
+
+* router-outlet is an html tag which controls the loading of all routes given in app.module.ts .
+
+* The children routes will not listen to the parent's router-outlet .
+
+* So , we need to add router-outlet for all children routes where we need to load these components .
+
+* Otherwise we cannot use children route .
+
+## Example : ##
+
+* Here , we have two parent routes one is user and another one is server .
+
+* We have only used the router-outlet in app.component.html to load all routs as parent before .
+
+* But , we have inserted nested routes . So we should add router-outlet tag in necessary html where we should call the child component .
+
+* First In Userscomponent template , insted of calling the usercomponent , we must call router-outlet as follows :
+
+```javascript
+
+<div class="row">
+
+    <div class="col-xs-6 col-sm-4 col-md-6 col-lg-6">
+
+        <div class="list-group">
+            <a 
+            [routerLink]="['/users', user.id , user.name ]"
+            href="#"
+            class="list-group-item"
+            *ngFor="let user of users"
+            > {{ user.name }}</a>
+        </div>
+
+        </div>
+
+        <div class="col-xs-6 col-sm-4 col-md-6 col-lg-6">
+        <!-- <app-user></app-user> -->
+          <router-outlet></router-outlet>
+        </div>
+    </div>
+
+```
+
+* Next , we have server component as parent and it has two children . So , we need to call the router-outlet in serverComponents template instead of calling the child components .
+
+```javascript
+<p>server works!</p>
+<div class="row">
+    <div class="col-xs-12 col-sm-4">
+        <div class="list-group">
+            <a href="#"
+            [routerLink]="['/servers', server.id]"
+            [queryParams]="{allowEdit : '1'}"
+            fragment="loading"
+            class="list-group-item"
+            *ngFor="let server of servers"
+            >
+            {{ server.name }}
+           </a>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-4">
+
+        <router-outlet></router-outlet>
+
+        <!-- <button class="btn btn-primary" (click)="onReload()"> Reload Page </button>
+
+        <app-edit-server></app-edit-server>
+        <hr>
+        
+        <app-single-server></app-single-server> -->
+
+    </div>
+</div>
+```
+# Using Query parameters #
+
+* We can access the queryParams of one component in another component with subscribe method as follows :
+
+```javascript
+.
+.
+.
+this.router.queryParams.subscribe(                // Accessing the queryparams wih subscribe method .
+        (queryParams : Params )  => {
+          this.allowEdit = queryParams['allowEdit'] === '1' ? true : false ;
+        }
+
+    ); 
+.
+.
+.
+```
+
+# QueryParams configuration navigation with queryParamsHandling property #
+
+* queryParamsHandling is the javascript property to handle the queryparams which takes string as input .
+
+* There are two string values avaiable : 
+
+  * 1) merge --> It adds the new querParams with old one .
+
+  * 2) preserve --> It keeps the old queryParams and transfer it to anothe navigation .
+
+* We should use this queryParamshandling property where we need to navigate with the same queryParams .
+
+## Example : ##
+
+* We should keep the queryParams of singleseverver component to editserver component to identify which is having edit access .
+
+* So , we should use the queryparams in singleServerComponent while navigating with preserve . 
+
+```javascript
+.
+.
+.
+onEdit(){
+this.router.navigate( ['edit'] , { relativeTo : this.route ,  queryParamsHandling : 'preserve'} );      
+}
+.
+.
+.
+
+```
+# Redirecting and wildcard routs #
+
+* These routes controls the application if the wrong or unwanted url is clicked or changed .
+
+* This method helps to navigate to seperate " Page Not Found " component if Provided url is invalid .
+
+* To do this , first we should have special component which contains "page Not found" message or some animations according to developer .
+
+* We must have one default page-not found route with it's component .
+
+* After that , we should redirect the component to all other wrong url 's by setting the path to ** .
+
+* It is important to set the path ** to notify the angular to move other url to page-not-found component .
+
+## redirectTo ##
+
+* redirectTo is the important parameter in routes which redircts to the path which we need to use existing component .
+
+* It is used as alternative to the component property in case we need to use same component .
+
+* It is mostly used in page-not-found method . But , we can use it for other components also .
+
+## Example : ##
+
+```javascript
+.
+.
+.
+
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+
+const appRoutes : Routes = [
+  { path : '' , component : HomeComponent } ,
+  { path : 'users' , component : UsersComponent , children : [
+     { path : ':id/:name' , component : UserComponent } 
+  ] } ,
+  { path : 'servers' , component : ServerComponent , children : [
+    { path : ':id' , component : SingleServerComponent } ,
+    { path : ':id/edit' , component : EditServerComponent  }
+  ] } ,
+  { path : 'not-found' , component : PageNotFoundComponent},
+  { path : '**' , redirectTo: '/not-found'}                          // Alwys use it in last
+ 
+];
+.
+.
+.
+
+```
+### NOTE : ###
+
+* Always use the redirective route in last . If it use in anywhere else , it will collapse other routing with page not found component .
+
+# Outsourcing router configurations #
+
+* For a compex application it is difficult to have all the routes in the app.module.ts .
+
+* So , we can handle all our routes in a seperate file called app-routing.module.ts with the same behaviour .
+
+* It will improve redability and better understanding on routing for complex application .
+
+## Procedure ##
+
+* Transfer all the routes declared in app.module.ts to app-routing.module.ts .
+
+* import all the missing modules in app-routing.module.ts .
+
+* Shift the routermodule from imports array of app.module.ts to imports array of app-routing.module.ts .
+
+* Kindly import Router Module in app-routing.module.ts and remove it in app.module.ts if it is not necessary .
+
+* In app-routing.module.ts file , add an exports array to export the Router Module .
+
+* The exports array in module decorator used to tell angular to accept the module which is exported here where it is get imported .
+
+* So , inorder to tell the app.module.ts file to use RouterModule , we should import the AppRoutingModule in app.module.ts .
+
+## Example : ##
+
+### app.module.ts ###
+
+```javascript
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
+import { ServerComponent } from './servers/server/server.component';
+import { EditServerComponent } from './servers/edit-server/edit-server.component';
+import { UsersComponent } from './users/users.component';
+import { UserComponent } from './users/user/user.component';
+import { SingleServerComponent } from './servers/server/single-server/single-server.component';
+import { ServersService } from './servers/server/server.service';
+import { FormsModule } from '@angular/forms';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { AppRoutingModule } from './app-routing.module';
+
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    ServerComponent,
+    EditServerComponent,
+    UsersComponent,
+    UserComponent,
+    SingleServerComponent,
+    PageNotFoundComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    AppRoutingModule
+  ],
+  providers: [
+    ServersService
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+
+### app-routing.module.ts ###
+
+```javascript
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+import { HomeComponent } from "./home/home.component";
+import { PageNotFoundComponent } from "./page-not-found/page-not-found.component";
+import { EditServerComponent } from "./servers/edit-server/edit-server.component";
+import { ServerComponent } from "./servers/server/server.component";
+import { SingleServerComponent } from "./servers/server/single-server/single-server.component";
+import { UserComponent } from "./users/user/user.component";
+import { UsersComponent } from "./users/users.component";
+
+
+
+const appRoutes : Routes = [
+    { path : '' , component : HomeComponent } ,
+    { path : 'users' , component : UsersComponent , children : [
+       { path : ':id/:name' , component : UserComponent } 
+    ] } ,
+    { path : 'servers' , component : ServerComponent , children : [
+      { path : ':id' , component : SingleServerComponent } ,
+      { path : ':id/edit' , component : EditServerComponent  }
+    ] } ,
+    { path : 'not-found' , component : PageNotFoundComponent},
+    { path : '**' , redirectTo: '/not-found'}
+   
+  ];
+
+@NgModule({
+    imports : [
+        RouterModule.forRoot(appRoutes)
+    ] ,
+    exports : [
+        RouterModule
+    ]
+
+})
+
+export class AppRoutingModule {}
+```
+# Guard #
+
+## CanActivate ##
+
+* CanActivate is an interface which provided by anglar routr package .
+
+* It forces to have CanActivat method in it's class .
+
+* CanActivate method will have two arguments as follows :
+
+ * ActivatedRouteSnapshot .
+
+ * RouterStateSnapshot .
+
+* These arguments need to be imported form anglar/router and they are provided by angular to handle guarding while routing .
+
+* CanActivate method may return :
+
+    * Observable of type boolean => Observable<boolean>  |
+    * Promise<boolean> | 
+    * boolean
+
+* CanActivate can be run as both  Asynchronously ( Which returns Observable or Promise )  and Synchronously ( Which returns boolean ) .
+
+### Synchronous ###
+
+* Synchronos means sequence .
+
+* It will only run line by line .
+
+
+### Asynchronous ###
+
+* Asynchronous means non-sequence .
+
+* It will not wait for previous line get executed .
+
+* Usually , setTimeout() , setInterval() are asynchrnous .
+
+## Promise ##
+
+* A JavaScript Promise object contains both the producing code and calls to the consuming code .
+
+### syntax ###
+
+```javascript
+let myPromise = new Promise(function(myResolve, myReject) {
+// "Producing Code" (May take some time)
+
+  myResolve(); // when successful
+  myReject();  // when error
+});
+
+// "Consuming Code" (Must wait for a fulfilled Promise)
+myPromise.then(
+  function(value) { /* code if successful */ },
+  function(error) { /* code if some error */ }
+);
+```
+
+### Use of Promise ###
+
+```javascript
+myPromise.then(
+  function(value) { /* code if successful */ },
+  function(error) { /* code if some error */ }
+);
+```
+* Promise.then() takes two arguments, a callback for success and another for failure.
+
+* Both are optional, so you can add a callback for success or failure only.
+
+## Example : ##
+
+### auth.service.ts ###
+
+```javascript
+export class AuthService {
+    loggedIn = false ;
+
+isAuthenticated(){
+    const promise = new Promise(
+        (resolve,reject) => {
+            setTimeout(
+                () => {
+                    resolve(this.loggedIn);
+                },800)
+        }
+    )
+    return promise;
+}
+
+
+login(){
+    this.loggedIn = true ;
+}
+
+logout(){
+    this.loggedIn = false ;
+}
+
+}
+```
+
+### auth-guard.service.ts ###
+
+```javascript
+import { Injectable } from "@angular/core";
+import { ActivatedRoute, ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree  } from "@angular/router";
+import { Observable } from "rxjs";
+import { AuthService } from "./auth.service";
+
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+
+
+    constructor( private authService : AuthService , private router : Router){}
+
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): 
+    boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | any
+        
+    // canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+    //  Observable<boolean> | Promise<boolean> | boolean | 
+    
+      {
+  return this.authService.isAuthenticated()
+  .then(
+        (authenticated : boolean) => {
+            if(authenticated ){
+                return true ;
+            }
+            else {
+                this.router.navigate(['/']);
+            }
+        }
+    )
+        
+    }
+
+}
+
+```
+
+# Using canActivate in app-routing.module.ts #
+
+* canActivate is an property which is a type of array that takes the guard service as value in app-routing.module.ts .
+
+```javascript
+.
+.
+.
+
+const appRoutes : Routes = [
+    { path : '' , component : HomeComponent } ,
+    { path : 'users' , component : UsersComponent , children : [
+       { path : ':id/:name' , component : UserComponent } 
+    ] } ,
+    { path : 'servers' , canActivate : [AuthGuard] ,component : ServerComponent , children : [
+      { path : ':id' , component : SingleServerComponent } ,
+      { path : ':id/edit' , component : EditServerComponent  }
+    ] } ,
+    { path : 'not-found' , component : PageNotFoundComponent},
+    { path : '**' , redirectTo: '/not-found'}
+   
+  ];
+  .
+  .
+  .
+
+```
+# canActivateChild #
+
+* canActivateChild is the guard which is used inside the children routes .
+
+* It is similar to the canActivate method .
+
+## Example : ##
+
+### auth-gurad.service.ts ###
+
+```javascript
+import { Injectable } from "@angular/core";
+import { ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot, UrlTree  } from "@angular/router";
+import { Observable } from "rxjs";
+import { AuthService } from "./auth.service";
+
+
+@Injectable()
+export class AuthGuard implements CanActivate , CanActivateChild{
+
+
+    constructor( private authService : AuthService , private router : Router){}
+
+canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+ boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
+
+    return this.authService.isAuthenticated()
+    .then(
+        (authenticated):boolean => {
+            if (authenticated) {
+                return true;
+            }
+            else {
+                this.router.navigate(['/']);
+                return false;
+            }
+        },
+    );
+}
+
+canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree>{
+
+    return this.canActivate(route,state);
+}
+
+}
+
+
+```
+
+### app-routing.module.ts ###
+
+```javascript
+.
+.
+.
+
+const appRoutes : Routes = [
+    { path : '' , component : HomeComponent } ,
+    { path : 'users' , component : UsersComponent , children : [
+       { path : ':id/:name' , component : UserComponent } 
+    ] } ,
+    { path : 'servers' ,
+    // canActivate : [AuthGuard],
+     canActivateChild : [AuthGuard] ,
+     component : ServerComponent ,
+      children : [
+      { path : ':id' , component : SingleServerComponent } ,
+      { path : ':id/edit' , component : EditServerComponent  }
+    ] } ,
+
+    { path : 'not-found' , component : PageNotFoundComponent},
+    { path : '**' , redirectTo: '/not-found'}
+   
+  ];
+.
+.
+.
+
+```
