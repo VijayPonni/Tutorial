@@ -31,4 +31,9 @@ getServer(id :number){
     return server;
 }
 
+updateServer (id: number, update: { name: any; status: string; }){
+        this.servers[id].name = update.name;
+        this.servers[id].status = update.status;
+}
+
 }

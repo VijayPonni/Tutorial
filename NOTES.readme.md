@@ -2763,3 +2763,435 @@ const appRoutes : Routes = [
 .
 
 ```
+
+# canDeactivate #
+
+* It is process to add extra guard to certain component by sending an confirmation message that they need to leave the page with changes or not .
+
+* It is slightly similar to canActivate method .
+
+* It is also needed to be done with seperate service file .
+
+### can-deactivate-guard.service.ts file ###
+
+```javascript
+import { ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot, UrlTree } from "@angular/router";
+import { Observable } from "rxjs"
+
+export interface CanComponentDeactivate {
+    canDeactivate : () =>  Observable<boolean> | Promise<boolean> | boolean ;
+}
+
+export class CanDeactivateGuard implements CanDeactivate<CanComponentDeactivate> {
+    canDeactivate(component: CanComponentDeactivate,
+                 currentRoute: ActivatedRouteSnapshot,
+                  currentState: RouterStateSnapshot, 
+                  nextState?: RouterStateSnapshot | undefined): boolean | UrlTree | Observable<boolean | UrlTree> | 
+                                                                 Promise<boolean | UrlTree> 
+                {
+                return component.canDeactivate();
+               }
+}
+```
+* It should be collaborated with interface which should be implemented in the required component where we want to do deactive guard .
+
+### edit-server.component.ts file ###
+
+```javascript
+.
+.
+.
+
+import { CanComponentDeactivate } from './can-deactivate-guard.service';
+
+...
+
+export class EditServerComponent implements OnInit , CanComponentDeactivate {
+
+...
+
+  allowEdit = false ;
+  changesSaved = false ;
+
+...
+
+    onUpdateServer(){
+    this.serversService.updateServer(this.server.id , { name : this.serverName , status : this.serverStatus});
+    this.changesSaved = true ;
+    this.route.navigate(['../']  , {relativeTo : this.router});
+  }
+
+
+  canDeactivate() : boolean | Observable<boolean> | Promise<boolean> {    // The exact consition to execute deactivate guard
+
+    if(!this.allowEdit){
+      return true;
+    }
+    
+    if( (this.serverName === this.serverName || (this.serverName === this.serverName) ) && !this.changesSaved){
+    return confirm("Do you want to discard the changes ? ");
+  }
+  else {
+    return true;
+  }
+
+   
+
+
+  }
+ 
+
+
+
+}
+
+```
+* We must add the candeactivate parameter in routing as canactivate . 
+
+### app-routing.module.ts file ###
+
+```javascript
+
+...
+
+     component : ServerComponent ,
+      children : [
+      { path : ':id' , component : SingleServerComponent } ,
+      { path : ':id/edit' , component : EditServerComponent , canDeactivate : [ CanDeactivateGuard ] }
+    ] } ,
+
+...
+
+  
+```
+
+* Kindly import all service files in app.module.ts file .
+
+# Passing static data to a route #
+
+* Consider that we have a default message to show over all the other routes and need to be called when it needed .
+
+* We can use data attribute in routes to use this .
+
+## Example : ##
+
+* We should show a error message if wrong url is entered .
+
+* It is reusable .
+
+```javascript
+.
+.
+.
+    { path : 'not-found' , component : ErrorPageComponent , data : { message : "An error occured ! " } },
+    { path : '**' , redirectTo: '/not-found'}
+.
+.
+.
+
+```
+
+* we can use this data in another component where we need it by calling it as bellow : 
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Data } from '@angular/router';
+
+@Component({
+  selector: 'app-error-page',
+  templateUrl: './error-page.component.html',
+  styleUrls: ['./error-page.component.css']
+})
+export class ErrorPageComponent implements OnInit {
+
+  errorMessage!: string;
+
+  constructor(
+    private route : ActivatedRoute
+  ) { }
+
+  ngOnInit(): void {
+    this.errorMessage = this.route.snapshot.data['message'];
+
+    // this.route.data.subscribe(
+    //   (data : Data) => {
+    //     this.errorMessage = data['message']
+    //   }
+    // );
+
+  }
+
+}
+
+```
+# Resolve method #
+
+* Resolve is the concept which loads the dynamci data of particular component in faster way and it is mainly used for asynchronous data .
+
+* To do this , e should have seperate service file .
+
+### server-resolver.service.ts ###
+
+```javascript
+import { Injectable } from "@angular/core";
+import { ActivatedRoute, ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from "@angular/router";
+import { Observable } from "rxjs";
+import { ServersService } from "../server.service";
+
+interface Server{
+    id : number;
+    name : string ;
+    status : string ;
+}
+
+@Injectable()
+export class ServerResolver implements Resolve<Server> {
+    
+    constructor(
+        private service : ServersService
+    ){ }
+
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): 
+    Server | Observable<Server> | Promise<Server> | any {
+        return this.service.getServer(+route.params['id']);
+    }
+ 
+
+}
+```
+
+### app-routing.module.ts ###
+
+```javascript
+
+...
+
+
+    { path : 'servers' ,
+    // canActivate : [AuthGuard],
+     canActivateChild : [AuthGuard] ,
+     component : ServerComponent ,
+      children : [
+      { path : ':id' , component : SingleServerComponent , resolve : { server : ServerResolver} } ,
+      { path : ':id/edit' , component : EditServerComponent , canDeactivate : [ CanDeactivateGuard ] }
+    ] } ,
+
+
+  ...
+
+```
+
+### Recieving data in single-server.component.ts file ###
+
+```javascript
+...
+
+
+    ngOnInit() {
+
+      this.route.data.subscribe(
+        (data:Data) => {
+          this.server = data['server'];
+        }
+      );
+
+    }
+
+...
+```
+
+# useHash routing #
+
+* To make our routing support to all web , we need to set the usehash routing to true .
+
+### app-routing.module.ts file ###
+
+```javascript 
+...
+
+ imports : [
+        RouterModule.forRoot(appRoutes , {useHash : true})
+    ] ,
+    
+...
+```
+
+# Understanding Observables #
+
+* Observable are basically a part of data-sorce .
+
+## Various data sources ##
+
+* Http request .
+* (UserInput) Events .
+
+* In angular application , we use the rxjs which is 3rd party package to use observables .
+
+## Parts of Observable ##
+
+* Observable and Observer .
+
+* As we noted above Observable is the data-source which we need .
+
+* Observer is simply our code / us who utilizes the source .
+
+* These two different things are seperated by a streaming timeline .
+
+## 3 Ways of handling data ##
+
+* Handle Data .
+
+* Handle Error .
+
+* Handle Completion .
+
+# Creating own Observable # 
+
+### Observables are belongs to the rxjs library ###
+
+* To create own Observables we need to import necessary files from rxjs . But this is not requied when we use subscribe method in params observable ( Common Observable )
+
+## Using interval method ##
+
+* import interval from rxjs .
+
+* interval is like an function that emits an event to every particular time we fixed .
+
+* This is an example for Observable that we need to subscribe with the event .
+
+* It will leads to unwanted memory leaks even the component get destroyed .
+
+* So to avoid the unwanted memory leakage , we need to unsubscribe the subscription .
+
+## Example : ##
+
+* We have created an interval observable which generates an number for every one second .
+
+* We should subscibe to the Observable and unsubscribe when we leave the component to avoid unwanted memory leaks in application .
+
+* For , Angular Observables ( Ex : Params ) , we don't need to unsubscribe but angular takes care of that . It may differ in differnt situations .
+
+```javascript
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { interval, Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class HomeComponent implements OnInit , OnDestroy{
+
+  private firstObsSubscribe!: Subscription;
+
+  constructor(private route: Router) { }
+
+  ngOnInit(): void {
+
+    this.firstObsSubscribe = interval(1000).subscribe(
+      count => { console.log(count);
+      }
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.firstObsSubscribe.unsubscribe();
+  }
+
+  goUser(){
+  this.route.navigate(['user']);
+  }
+
+}
+```
+
+# Creating new custom Observable #
+
+* 1 -->  import Observable from rxjs .
+
+* 2 -->  Call the Observable with create method which accepts another function( anonymous arrow function ) an arguments .
+
+```javascript
+import Observable from 'rxjs';
+.
+.
+.
+
+const var_name = Observable.create(
+  () => {}                       //function
+);
+
+.
+.
+.
+
+```
+
+* 3 --> The arrow function will automatically get an argument of observer .
+
+```javascript
+.
+.
+.
+const var_name = Observable.create( observer => { } );    //observer argument from rxjs
+.  
+.
+.
+
+```
+
+### observer argument ###
+
+* Observer is responsible for listening to data , error and completion of observable .
+
+* It has three types of methods as follows :
+
+ * observer.next()     --> It is used to emit a new value .
+ * observer.error()    --> It is used to throw an error .
+ * observer.complete() --> It is used to identify wheather some event is done .
+
+ * 4 --> subscribe to the custome Observable .as below :
+
+ ```javascript
+ ...
+this.variable_name = var_name.subscribe( data   => console.log(data); ) 
+ ...
+
+ ```
+
+ ## Example : ##
+
+ ```javascript
+ ...
+
+ ngOnInit(): void {
+
+    // this.firstObsSubscribe = interval(1000).subscribe(
+    //   count => { console.log(count);
+    //   }
+    // );
+
+    const customObservable = Observable.create(
+      (      observer: { next: (arg0: number) => void; }) => { 
+        let count =0;
+        setInterval(
+          () => {
+            observer.next(count);
+            count++;
+          },1000
+          );
+      }
+    );
+
+    this.firstObsSubscribe = customObservable.subscribe(
+      (data: any) => { console.log(data);
+      }
+    );
+
+
+  }
+
+...
+
+ ```
