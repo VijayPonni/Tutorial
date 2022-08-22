@@ -1,0 +1,147 @@
+<p>template-driven works!</p>
+<div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-sm-10 col-md-8 col-sm-offset-1 col-md-offset-2">
+
+        <button class="btn btn-success" (click)="backToHome() "> Back </button>
+
+
+        <!-- <form (ngSubmit)="onSubmit(f)" #f="ngForm"> -->
+          <form (ngSubmit)="onSubmit()" #f="ngForm">
+  
+          <div id="userInfo"  
+          ngModelGroup="userInfo"
+          #userData="ngModelGroup"
+          >
+  
+            <div class="form-group">
+              <label for="username"> User Name </label>
+  
+              <input 
+              type="text" 
+              id="username" 
+              class="form-control"
+              ngModel
+              name="username"
+              required
+              #name="ngModel"
+              >
+  
+              <span class="help-block" *ngIf="!name.valid && name.touched"> Please Enter a Name !  </span>
+  
+  
+            </div>
+            <br>
+            <button 
+            class="btn btn-warning"
+             type="button"
+             (click)="suggestUserName()"
+             >Suggest an user Name</button>
+  
+  
+            <br>
+            <br>
+            <div class="form-group">
+  
+              <label for="email">Mail</label>
+  
+              <input 
+              type="email" 
+              id="email" 
+              class="form-control"
+              ngModel
+              name="email"
+              required
+              email
+              #email="ngModel"  
+              >
+            <span class="help-block" *ngIf=" !email.valid && email.touched "> Plaese Enter a valid email ! </span>
+  
+            </div>
+          </div>
+  
+          <p *ngIf="!userData.valid && userData.touched"> user details not yel filled ! </p>
+  
+          <br>
+          <div class="form-group">
+            <label for="secret">Secret Questions</label>
+            <select 
+            id="secret" 
+            class="form-control"
+            [ngModel]="defaultvalue"
+            name="secret"
+  
+            >
+              <option value="pet"> Your first pet ? </option>
+              <option value="teacher"> Your first teacher ? </option>
+            </select>
+          </div>
+  
+          <div class="form-group">
+  
+            <textarea 
+            name="questionAnswer" 
+            rows="3"
+            class="form-control"
+           [(ngModel)]="answer"
+  
+            >
+            </textarea>
+  
+            <p>  Your Reply : {{ answer  }} </p>
+  
+  
+          </div>
+  
+          <div class="radio" *ngFor="let gender of genders">
+            <label for="">
+              <input 
+              type="radio"
+              name="gender"
+              ngModel
+              [value]="gender"
+              >
+              {{ gender }}
+            </label>
+  
+          </div>
+  
+          <br>
+          <button 
+          class="btn btn-primary" 
+          type="submit"
+          [disabled]="!f.valid"   
+          > Submit </button>            <!-- Disabling submit button if form is invalid using it's local refernec value -->
+        </form>
+  
+        <br>
+      </div>
+  
+      
+  
+  <div class="row">
+    <div class="col-xs-12">
+      <button class="btn btn-danger" (click)="resetForm()"> Reset Form </button>
+    </div>
+  </div>
+  
+    </div>
+  
+    <hr>
+  
+    <div class="row">
+      <div class="col-xs-12">
+        <div *ngIf="submitOrNot">
+        <h3> Form Data : </h3>
+        <br>
+        <p> Name :{{ DataToShow.userName }}  </p>
+        <p> Email : {{ DataToShow.Email }} </p>
+        <p> SecretQuestion :{{ DataToShow.secretQuestion }} </p>
+        <p> Answer :  {{ DataToShow.Answer }}</p>
+        <p> Gender :{{ DataToShow.gender }} </p>
+  
+      </div>
+      </div>
+    </div>
+  
+  </div>  

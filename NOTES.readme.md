@@ -3195,3 +3195,885 @@ this.variable_name = var_name.subscribe( data   => console.log(data); )
 ...
 
  ```
+
+## observer.error ##
+
+* here is simple explanatio to handle error .
+
+```javascript
+...
+
+        setInterval(
+          () => {
+            observer.next(count);
+            if(count>3){
+              observer.error( new Error( ' Count is greater than 3 ! ') );
+            }
+            count++;
+          },1000
+        )
+
+...
+```
+## observer.complete() ##
+
+```javascript
+...
+  if(count===2){
+              observer.complete();
+            }
+...
+    this.firstObsSubscribe = customObservable.subscribe(
+      (data: any) => { console.log(data);
+      },
+      ( error: any) => {console.log(error);
+        alert(error.message);
+      },
+      () => {
+        console.log("completed!");
+        
+      }
+    );
+
+
+  ...
+```
+# Operators # 
+
+* Operators are acts as intermediate which is used to handle the raw data from observable .
+
+* Sometimes , we don't want to use the exact data from observable , we may add extra infomation on it or somethingelse we need to alter.
+
+* In this case , operartors came inti play which is used to handle the data before subscribe to it .
+
+* We can also do this insude subscription method but for complex problems it will be inconvenient .
+
+<img src="images\observable-operator.png">
+
+* Operators have lots of methos within it . We can use according to our need .
+
+* Befor using operartor in our observable , it is manditory to import them from rxjs/operators .
+
+## Some most often used operators : ##
+
+* map 
+
+* filter 
+
+* SwitchMap
+
+* MergeMap
+
+* Merge
+
+* ForkJoin
+
+* CombineLatest
+
+* DistinctUntilChanged
+
+## pipe() method ##
+
+* Every observable uses pipe method .
+
+* It is built in to rxjs .
+
+```javascript
+.
+.
+
+
+    customObservable.pipe();
+
+.
+.
+
+```
+
+## Using of Operators in pipe() ##
+
+* Operatoes are methods which implemets our own function on the original data within the pipe method .
+
+* It shoud return the data in required format .
+
+```javascript
+...
+ customObservable.pipe(
+      map( data => { return "Round:" + ( data ) + 1 } )    //map opearator to add Round text infront of data observable
+    );
+...
+```
+* Only creating the observable wil not add the changes in output .
+
+* We need to subscribe to the piped observable . so that only we are able to get the desired output as below :
+
+```javascript
+.
+.
+
+
+    this.firstObsSubscribe =   customObservable.pipe(
+      map( data => { return "Round:" + ( data ) + 1 } )    
+    ). subscribe(                                       //Subscribing to piped observable with required opearator .
+      (data: any) => { console.log(data);
+      },
+      ..
+    )
+.
+.
+
+```
+
+* With the help of pipe , we can use more than one operator for data .
+
+* We can seperate them by comma and need to import every operators from  rxjs/operators .
+
+
+
+## Example : ##
+
+* Consider in our customObservable , we nedd to add text infront of the data and used two operators map and filter before subscribing to it .
+
+```javascript
+.
+.
+import { map , filter } from 'rxjs/operators'
+
+.
+.
+.
+
+    this.firstObsSubscribe =   customObservable.pipe(
+      filter( (data:number) =>{ return data >0 }  )  ,
+      map( (data:number) => { return "Round:" + ( data + 1) } )   ,
+    ). subscribe(                                                  //Subscribing to piped observable with required opearator .
+      (data: any) => { console.log(data);
+      },
+      ( error: any) => {console.log(error);
+        alert(error.message);
+      },
+      () => { 
+        console.log("completed!");
+        
+      }
+    );
+
+.
+.
+.
+
+```
+
+# Subjects #
+
+* Subjects are alternative to EventEmitters .
+
+* Subjects need to be imported form rxjs.
+
+* It is mostly similar to Eventemiiters but efficeint .
+
+```javascript
+import { EventEmitter, Injectable } from "@angular/core";
+import { Subject } from "rxjs";
+
+@Injectable( { providedIn:'root' } )     //It is an alternative way to tell angular that service is added ( instead of add the new service file in providers array in appmdule.ts file we can use this approach )
+ 
+export class Userservice {
+    // activatedEmitter = new EventEmitter<boolean>();      // Using eentEmitters 
+    activatedEmitter = new Subject<boolean>();              // Using subject 
+
+}
+```
+
+* While using subjects , we should not use emit to listen to the event . Alternative to emit is next because Subject is the special kind of observable .
+
+
+```javascript
+.
+.
+.
+
+onActivate(){
+  // this.userService.activatedEmitter.emit(true);           // Calling normal EventEmitter using emit()
+  this.userService.activatedEmitter.next(true);              // Calling the subject using next()
+}
+.
+.
+.
+
+```
+
+* We can trigger the observable from outside .
+
+<img src="images\subject-observable.png">
+
+## Important Notes on Subject ##
+
+* We should also unsubscribe to subject as any observable .
+
+* We can only use subjects where we mannually generate EventEmitters which means we cannot use this for angular builtin fnctionalities like @Output likw that . 
+
+# Forms # 
+
+# Forms and Angular #
+
+* Basicaly , forms need to be validated before submiting it. To help in validating and other extra features in forms we should use javascript .
+
+* We should have form details in objects notation in typescript code to work with it .
+
+* The object notation should have value which is an object that contains key , value pairs of form details .
+
+* The object notation should also have metadata ( extra information on data ) that checks validity .
+
+### Example : Object Notation ###
+
+```javascript
+{
+  value : {
+    name : "...",
+    email : "..."
+  }
+  valid : true;
+}
+```
+# Approaches of handling forms #
+
+* Angular allows two different approaches in handling forms :
+ 
+ * Template-driven approach.
+
+ * Reactive approach .
+
+## Template-driven approach ##
+
+* Angular infers the form object from the DOM ( Template ).
+
+## Reactive approach ##
+
+* Form is created programaticaly and synchronised with the DOM .
+
+# Template-driven Forms #
+
+* import FormsModule .
+
+* The imported FormsModule will create dynamic javascript object representation of the forms which is used in HTML template .
+
+## input field control of Forms using ngModel  ##
+
+* ngModel is directive which is used to store the value of input field .
+
+* The user entered value is stored in the ngModel directive which is offered by FormsModule .
+
+* name attribute and ngModel attribute are property and value of javascript format of any Forms .
+
+## Submitting Forms using (ngSubmit)="method()" ##
+
+### The correct place to all submit method ( with Form submit logic ) in template ###
+
+* If we already have a submit button  with type="submit" , then it is not correct place to call the our submit method logic as the type="submit" will automtically call an javascript submit which is builtin in HTML .
+
+* But , Angular provides the ngSubmit directive to use the control the submition of form .
+
+* We should use the ngSubmit directive in the form tag itself binded with our submit method .
+
+```javascript
+
+  <form (ngSubmit)="onSubmit()">
+  ...
+</form>
+
+```
+## Get access to the form with local references ##
+
+* Add a local reference variable to get access the form element .
+
+* Pass the variable as an argument in the method we pass .
+
+```javascript
+<form (ngSubmit)="onSubmit(f)" #f>
+```
+
+* Then , In the method , pass the form a an argument of type HtmlFormElement and try to console to verify that .
+
+```javascript
+
+onSubmit(form : HTMLFormElement){
+  console.log(form);
+  
+  console.log(" Form submitted ! ");
+  
+  
+}
+
+```
+## use ngForm to expose the form to get values ##
+
+* Set the local Reference to ngForm directive and change type of form from HtmlFormElement to ngForm in method .
+
+```javascript
+<form (ngSubmit)="onSubmit(f)" #f="ngForm">
+...
+</form>
+```
+
+```javascript
+onSubmit(form : NgForm){
+  console.log(form);
+  
+  console.log(" Form submitted ! ");
+  
+  
+}
+```
+
+### Output with values ###
+
+* We can get the form values we entered in the values array of object which consists the name as property and ngModel as value .
+
+<img src="images\Forms-ngform.png">
+
+# Accessing forms with @Viewchil() #
+
+* We can submit the form in another way using local references .
+
+* This method can be used if we need to access the form before submitting it .
+
+```javascript
+  <!-- <form (ngSubmit)="onSubmit(f)" #f="ngForm"> -->
+        <form (ngSubmit)="onSubmit()" #f="ngForm">
+```
+```javascript
+export class AppComponent {
+  title = 'Forms';
+
+  @ViewChild('f') submitForm!: NgForm; 
+
+// onSubmit(form : NgForm){
+//   console.log(form);
+//  console.log(" Form submitted ! ");
+// }
+
+onSubmit(){
+ console.log(this.submitForm);
+}
+```
+# Validation to check User Input #
+
+## Identifying what happens ehind the scene when we use validation to our HTML input field ##
+
+### required ###
+
+* required is the default HTML attribute to a input field which determined the partclr field is filled or empty .
+
+### email ###
+
+* email is another directive to validate the email address wheather it is in correct format or not ? 
+
+## Example : ##
+
+* I have add required and email directives to input fields as below :
+
+<img src="images\required,email-template.png">
+
+* So , the valid object should have true if the fields are filled and email is in correct format .
+
+* At the same time , it should be false , if the fileds are empty and email is not in correct format . ( any one )
+
+## Correct (Valid : True ) ##
+
+<img src="images\validForm-TRUE.png">
+
+## Incorrect ( Valod : False ) ##
+
+<img src="images\validForm-FALSE.png">
+
+## Verifying the validation in template CSS : ##
+
+* Angular adds some classs dynamically to the elements for validation .
+
+### If vaild , the the template will have ng-valid attribute ###
+
+<img src="images\Correct-ngValid.png">
+
+### If inValid , then the template will have ng-invalid attribute ###
+
+<img src="images\Wrong-ngInvalid.png">
+
+# Validation in template #
+
+## disable Submit button if form is inavalid ##
+
+```javascript
+.
+.
+.
+ <button 
+        class="btn btn-primary" 
+        type="submit"
+        [disabled]="! f.valid"   
+        > Submit </button>            <!-- Disabling submit button if form is invalid using it's local refernec value f -->
+      </form>
+.
+.
+.
+
+```
+
+## Adding CSS styles ##
+
+* change the border color to RED , if the input field is invalid after the user clicked the field .
+
+```javascript
+input.ng-invalid.ng-touched{
+    border:1px solid red;
+}
+```
+
+# Displaying Warning message in the template if the particular field is InValid #
+
+* We should provide the particular warning Text below the input field .
+
+* And then have to provide condition according to the input if it is invaid .
+
+* To check the particular input field is valid or not , we should get the value using local Reference with ngModel directive .
+
+* So , we can use localreference variable in the condition below the warning text to decide wheather to display it or not ? 
+
+```javascript
+ <input 
+            type="email" 
+            id="email" 
+            class="form-control"
+            ngModel
+            name="email"
+            required
+            email
+            #email="ngModel"  
+            >
+          <span class="help-block" *ngIf=" !email.valid && email.touched "> Plaese Enter a valid email ! </span>
+```
+# Setting default value to input field using ngModel with propertyBinding #
+
+* We can add ngModel directive to input field with property binding which consists of a default value of that field .
+
+### app.component.html ###
+
+```javascript
+    <select 
+          id="secret" 
+          class="form-control"
+          [ngModel]="defaultvalue"
+          name="secret"
+
+          >
+            <option value="pet"> Your first pet ? </option>
+            <option value="teacher"> Your first teacher ? </option>
+          </select>
+```
+### app.component.ts ###
+
+```javascript
+  defaultvalue = 'pet';
+```
+
+### NOTE : Since it is select input field , we need to provide a valid option value as default ###
+
+* We can also set default value for ay input field .
+
+# Using NgModel with two-way Binding #
+
+* We can use ngModel with Two-way  binding where we need to upadte the value of input field for every keyStroke .
+
+## Example : ##
+
+* If we need to display the exact text in the field as below :
+
+### app.component.html ###
+
+```javascript
+  <div class="form-group">
+
+          <textarea 
+          name="questionAnswer" 
+          rows="3"
+          class="form-control"
+         [(ngModel)]="answer"
+
+          >
+          </textarea>
+
+          <p>  Your Reply : {{ answer  }} </p>
+
+
+        </div>
+```
+### app.component.ts ###
+
+```javascript
+ answer ='';
+```
+
+# Conclusion of using ngModdel in input field with various Bindling #
+
+### No Binding : To Tell Angular , It's just a control of input field . ###
+
+```javascript
+     <input 
+            type="text" 
+            id="username" 
+            class="form-control"
+            ngModel         //No Binding
+            name="username"
+            required
+            #name="ngModel"
+            >
+```
+
+### OneWay Binding [ Property Binding ] : To set the controls default value . ###
+
+```javascript
+<select 
+          id="secret" 
+          class="form-control"
+          [ngModel]="defaultvalue"         //Property binding to set Default Value .
+          name="secret"
+
+          >
+```
+
+### Two-way Binding : To get Instant value of the control for every key stroke . ###
+
+```javascript
+ <div class="form-group">
+
+          <textarea 
+          name="questionAnswer" 
+          rows="3"
+          class="form-control"
+         [(ngModel)]="answer"
+
+          >
+          </textarea>
+
+          <p>  Your Reply : {{ answer  }} </p>
+
+
+        </div>
+```
+# Grouping Form Controls #
+
+* If we want to group some contents in Form ( Especially , in large forms ) , we can make it with ngModelGroup directive .
+
+* First , wrap your group by a div element with id .
+
+```javascript
+
+<div id="Group_name">
+...
+</div>
+
+```
+
+* Then , use NngModelgroup in that div by assigning with some name which is the property name for that .
+
+```javascript
+<div id="user-data"  ngModelGroup="userInfo">
+.... grouping name and email ....
+</div>
+```
+<img src="images\grouping-form.png">
+
+
+* We can also acceess the Group fields with local References .
+
+```javascript
+
+<div id="userInfo"  
+ngModelGroup="userInfo"
+#userData="ngModelGroup"
+>
+.
+.
+.
+</div>
+
+ <p *ngIf="!userData.valid && userData.touched"> user details not yel filled ! </p>
+
+```
+
+# Handling radio Buttons #
+
+* Radio buttons are meant to be choose any one of the options provided .
+
+* We can use the radio buttons as every input fields .
+
+```javascript
+ <div class="radio" *ngFor="let gender of genders">
+          <label for="">
+            <input 
+            type="radio"
+            name="gender"
+            ngModel
+            [value]="gender"
+            required
+            >
+            {{ gender }}
+          </label>
+
+        </div>
+
+```
+```javascript
+ genders= ['Male' , 'Female' , 'Others' ] ;
+```
+
+# Set value and Patch Value of form #
+
+## setValue() method : ##
+
+* setalue() method is allows us to set the values for every input field by access the form .
+
+* It uses the javascript Object notation for set value for each input field .
+
+* It is used to set all the values .
+
+* app.component.html:
+
+```javascript
+  <button 
+          class="btn btn-warning"
+           type="button"
+           (click)="suggestUserName()"
+           >Suggest an user Name</button>
+
+```
+
+* app.component.ts :
+
+```javascript
+.
+.
+.
+
+ @ViewChild('f') submitForm!: NgForm; 
+  defaultvalue = 'pet';
+ answer ='';
+
+ genders= ['Male' , 'Female' , 'Others' ] ;
+
+ suggestUserName(){
+  const suggestUserName = "superUser";
+  this.submitForm.setValue({
+    userInfo : {
+      userame : suggestUserName,
+      email : "abc@gmail.com",
+    },
+    secret:'pet',
+    questionAnswer:'',
+    gender:'Male'
+  });
+ }
+ .
+ .
+ .
+
+```
+## patchValue() method : ##
+
+* It is better approach than setValues as we can set only which field we want to set .
+
+* It should be used bycalling the form attribute which contains the whole structure of our Form .
+
+```javascript
+ @ViewChild('f') submitForm!: NgForm; 
+  defaultvalue = 'pet';
+ answer ='';
+
+ genders= ['Male' , 'Female' , 'Others' ] ;
+
+ suggestUserName(){
+  .
+  .
+  .
+
+  const suggestUserName = "superUser";
+  // this.submitForm.setValue({
+  //   userInfo : {
+  //     userame : suggestUserName,
+  //     email : "abc@gmail.com",
+  //   },
+  //   secret:'pet',
+  //   questionAnswer:'',
+  //   gender:'Male'
+  // });
+
+  this.submitForm.form.patchValue({
+    userInfo:{ 
+      username : suggestUserName,    
+      email : "abc@gmail.com"                 // If only needs to set selective fields to be fixed 
+    }
+  });
+ }
+ .
+ .
+ .
+
+```
+# Using the Form Data after get from user  ( To display , To Handle , etc ) #
+
+* SomeHow , the data from form is obtained from the user and stored in the javascript Object format .
+
+* We can use the data ( Consider to display them after submitting it. ) by following procedure .
+
+## Procedures ##
+
+* Initiate an Object with properties with empty string or respected types according to all the input field in the form .
+
+* These property names need to be match with name attribute in the input field . It is our choice but try to make it relative to that for easy understanding .
+
+```javascript
+DataToShow = {
+  userName : '',
+  Email : '',
+  secretQuestion : '',
+  Answer : '',
+  gender : ''
+}
+```
+
+* In the sumbit method ( The Event triggered when submit button is clicked. ) we must replace the values with our original values as follows : 
+
+* Assign the values to the respect Form input fields .
+
+* Get the whole Form variable  ( this.submitForm ) , and call .value t get the values of each input field ( this.submitForm.value ) 
+
+* Next , Consider your javascript Objcet representation of your form and use the name attribute value here to get the value from input field . ( this.submitForm.value.questionAnswer ) . Here name attribute for answer input field is  ` questionAnswer ` in template .
+
+* NOTE : If you have used any Grouping in your Form , use the flow according to it . For Example , we have grouped name and email under userInfo so we have used like this ( `this.submitForm.value.userInfo.username;` , `this.submitForm.value.userInfo.email;` )
+
+```javascript
+
+submitOrNot=false;
+DataToShow = {
+  userName : '',
+  Email : '',
+  secretQuestion : '',
+  Answer : '',
+  gender : ''
+}
+
+onSubmit(){
+//  console.log(this.submitForm);
+this.submitOrNot=true;
+ this.DataToShow.userName = this.submitForm.value.userInfo.username;
+ this.DataToShow.Email = this.submitForm.value.userInfo.email;
+ this.DataToShow.secretQuestion = this.submitForm.value.secret;
+ this.DataToShow.Answer = this.submitForm.value.questionAnswer;
+ this.DataToShow.gender = this.submitForm.value.gender;
+}
+
+}
+```
+* We can bind the values in our template also .
+
+```javascript
+ <div class="row">
+    <div class="col-xs-12">
+      <div *ngIf="submitOrNot">
+      <h3> Form Data : </h3>
+      <br>
+      <p> Name :{{ DataToShow.userName }}  </p>
+      <p> Email : {{ DataToShow.Email }} </p>
+      <p> SecretQuestion :{{ DataToShow.secretQuestion }} </p>
+      <p> Answer :  {{ DataToShow.Answer }}</p>
+      <p> Gender :{{ DataToShow.gender }} </p>
+
+    </div>
+    </div>
+  </div>
+
+```
+
+# Resetting the form with reset() method : #
+
+* We can reset the Form with reset method by calling the form reference .
+
+* It is simply like reloading the page again .
+
+```javascript
+
+export class AppComponent {
+  title = 'Forms';
+
+  @ViewChild('f') submitForm!: NgForm; 
+
+.
+.
+.
+.
+ 
+resetForm(){
+  this.submitForm.reset();
+  
+}
+
+}
+
+```
+# Reactive Forms #
+
+* Form is created programatically and synchronised with DOM .
+
+# Setup Reactive Forms #
+
+* In reactive approach Forms is handled programatically in typescript file .
+
+##  1 ) Define a variable to wrap your whole form of type FormGroup which is imported from angular/forms . ##
+
+```javascript
+import { Component, OnInit } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-rective-forms',
+  templateUrl: './rective-forms.component.html',
+  styleUrls: ['./rective-forms.component.css']
+})
+export class RectiveFormsComponent implements OnInit {
+
+genders = ['Male' , 'Female'];
+
+  signUpForm!: FormGroup;          //define form variable 
+
+}
+
+```
+## 2 ) import reactiveFormsModule in app.module.ts ##
+
+*We should import the ReactiveFormsModule in ap.module.ts to work with reactive forms .
+
+```javascript
+import {  ReactiveFormsModule } from '@angular/forms';
+.
+.
+.
+
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RectiveFormsComponent,                  //import ReactiveFormsModule from AAngular/forms
+    TemplateDrivenComponent,
+    HomeComponent,
+
+  ],
+})
+
+.
+.
+.
+
+```
+

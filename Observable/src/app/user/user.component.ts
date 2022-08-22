@@ -1,17 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Route, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { Userservice } from '../user.service';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.css']
 })
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit , OnDestroy {
 
   id!: number;
 
+  subscribeToActivate! : Subscription;
+
   constructor(
-    private route : ActivatedRoute
+    private route : ActivatedRoute,
+    private userService : Userservice
   ) { }
 
 
@@ -25,13 +30,19 @@ export class UserComponent implements OnInit {
     //   }
     // );
 
-    this.route.params.subscribe(
+    this.subscribeToActivate = this.route.params.subscribe(
        (params : Params) => { this.id = + params['id'] ;}
     );
-   
-   
-  
-  }
+}
+
+onActivate(){
+  // this.userService.activatedEmitter.emit(true);           // Calling normal EventEmitter using emit()
+  this.userService.activatedEmitter.next(true);              // Calling the subject using next()
+}
+
+ngOnDestroy(): void {
+   this.subscribeToActivate.unsubscribe();
+}
 
 }
 
