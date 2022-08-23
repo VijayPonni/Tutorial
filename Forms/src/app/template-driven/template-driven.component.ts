@@ -59,7 +59,7 @@ DataToShow = {
 }
 
 onSubmit(){
-//  console.log(this.submitForm);
+ console.log(this.submitForm);
 this.submitOrNot=true;
  this.DataToShow.userName = this.submitForm.value.userInfo.username;
  this.DataToShow.Email = this.submitForm.value.userInfo.email;

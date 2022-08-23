@@ -4077,3 +4077,816 @@ import {  ReactiveFormsModule } from '@angular/forms';
 
 ```
 
+# Reactive Form creation in code #
+
+## Empty Recative Form Creation : ##
+
+* After initializing the form in typescript , we should create it dynamically in ngOnit() method .
+
+* ngOnInit() executed before the template . So , Form should be created withi the method .
+
+* To create the form , Assign the form variable of FormGroup type to new FormGroup ( { } ) ;
+
+* The javascript object represntation is empty . So , there is no avaiable form controls . 
+
+### reactive-form.component.ts : ###
+
+```javascript
+.
+.
+.
+
+export class RectiveFormsComponent implements OnInit {
+
+genders = ['Male' , 'Female'];
+
+  signUpForm!: FormGroup;
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( { } );    // empty Reactive Form Created 
+  }
+.
+.
+.
+}
+
+```
+## Basic Reactive form creation using FormControl : ##
+
+* The Reactive is need to be interact with the template's form to assigned with or stores the user values .
+
+* To , do this we must peovide the propeties and values to our javasript object representation in form variable .
+
+* The Property --> It denotes the name of the template's input fields which is part of form .
+
+* The value --> It should be triggered with new FormControl() which is imported from @angular/forms that is responsible for the data .
+
+### Example : ###
+
+* Consider , we have only one input field in our Form in Template .
+
+```javascript
+   <form>
+
+            <div class="form-group">
+
+              <label for="username">Username</label>
+
+              <input type="text"
+               id="username"
+                class="form-control"
+                >
+
+            </div>
+</form>
+```
+
+* Then , the Reactive form creation should be like this : 
+
+```javascript
+.
+.
+.
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {             // empty Reactive Form Created 
+      'username' : new FormControl(null)            // Adding username input field with initial value 'null'
+     } );  
+  }
+
+.
+.
+.
+
+
+```
+## Example Reactive Form with initial values : ##
+
+* Consider template for assigning in typescript FormControls .
+
+### reactive-forms.component.ts : ###
+
+```javascript
+.
+.
+.
+  signUpForm!: FormGroup;
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {             // empty Reactive Form Created 
+      'username' : new FormControl(null) ,          // Adding username input field with initial value 'null'.
+       'email' : new FormControl(null),             // Adding email input field with initial value 'null'.
+       'gender' : new FormControl('Male')            // Adding gender radio button with default value as 'Male'.
+     } );  
+  }
+.
+.
+.
+```
+
+# Syncing the HTML form with Reactive Form in typescript #
+
+* We have setup a basic reactive form in typescript using FormGroup and FormControl .
+
+* But , those things are not connected with template Form which we actually want to access .
+
+* To connect both of them , we want to do the following things :
+
+## Procedures to Connect the HML Form template with Reactive Form created in TypeScript ##
+
+### 1) Make sure ReactiveFormsModule is imported in app.module.ts : ###
+
+```javascript
+
+import {  ReactiveFormsModule } from '@angular/forms';
+
+.
+.
+.
+
+@NgModule({
+  ...
+  imports: [
+    .
+    .
+   ReactiveFormsModule,
+  ],
+})
+export class AppModule { }
+.
+.
+.
+
+```
+### 2) Bind the FormGroup directive to the FormGroup variable we have created in our typescript with in the form element (HTML) ###
+
+### reactive-forms.component.ts ###
+
+```javascript
+.
+.
+.
+  signUpForm!: FormGroup;
+.
+.
+.
+```
+
+* Here , signupForm is the variable name of our Form . So we need to bind this property with FormControl directive in form element using property Binding .
+
+### reactive-forms.component.html ###
+
+```javascript
+.
+.
+.
+  <form [formGroup]="signUpForm">   // Binding with Reactive Form Variable 
+  ...
+  </form>                                       
+. 
+.
+.
+```
+### 3) Bind all the other FormControls in HTML with the typescript Reactive Form using the FormControlName directive ###
+
+* We Whole form with typescript . But , we should connect each and every input controls in the Form with the reactive form to access it .
+
+* To do this , we should use `FormControlName` directive in the specific input field as an attribute and bind it's value to the property name we have provided in ReactiveForm javascript object representaion in typescript file .
+
+* For example , if i have given a property name as "username" in rectiveform ( .ts file ) , then i should bind in the specific input field as an attribute like this  ` FormControlName="username" `  ( .html file )
+
+### reactive-forms.component.html : ###
+
+```javascript
+.
+.
+.
+<label for="username">Username</label>
+ <input type="text"
+ id="username"
+formControlName="username"           // Binding username with Reactive form
+class="form-control"
+>
+</div>
+<div class="form-group">
+<label for="email">Mail</label>
+<input 
+type="email" 
+id="email" 
+formControlName="email"                //Binding email with reative form
+class="form-control"
+>
+</div>
+<div class="radio" *ngFor="let gender of genders">
+<label for="">
+<input 
+type="radio"
+formControlName="gender"                // Binding gender with reactive form
+[value]="gender"
+>
+{{ gender}}
+</label>
+</div>
+.
+.
+.
+
+```
+
+### reactive-forms.comonent.ts : ###
+
+```javascript
+.
+.
+.
+
+ signUpForm!: FormGroup;
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {             // empty Reactive Form Created 
+      'username' : new FormControl(null) ,          // Adding username input field with initial value 'null'.
+       'email' : new FormControl(null),             // Adding email input field with initial value 'null'.
+       'gender' : new FormControl('Male')            // Adding gender radio button with default value as 'Male'.
+     } );  
+  }
+  .
+  .
+  .
+
+```
+
+### NOte : To use these directives FormGroup and FormControlName we should have imported the ReactiveFormModule in app.module.ts ###
+
+# Verifying The Reactive form is connected with HTML #
+
+* To verify wheather our Reactive form is linked with the HTML template form , we should go to developer tools and check wheather the additional classes are attached or not ? 
+
+### Before linking with ReactievForm : ###
+
+<img src="images\ReactiveForm-BeforeConnection.png">
+
+### After connected with ReactiveForm : ###
+
+<img src="images\reactiveForm-AfterConnection.png" >
+
+# Reactive Form Submission using ngSubmit directive #
+
+* ngSubmit directive is the default HTML and jaascript functonality to submit the form . So , in the ReactiveForms also we need to use the same procedure .
+
+* But , only differnce is we don't want to use local references to access the form as we created our own form .
+
+```javascript
+.
+.
+.
+<form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+.
+.
+.
+```
+
+```javascript
+.
+.
+.
+
+onSubmit(){
+  console.log(" Form Submitted ! ");
+  console.log(this.signUpForm);
+}
+.
+.
+.
+
+```
+# Reactive Form Validation #
+
+* To add Validation to the Reactive Form , we should use the FormControl() constructor in typescript .
+
+* FormControl() constructor in typescript code can take more than argument .
+
+* First argument is to set initial value and the next argument is validators object which should be imported from angular forms that can handle differnet validatio fumction like required , email and etc .
+
+### Adding single Validator ###
+
+```javascript
+import { ... ,  Validators } from '@angular/forms';
+
+...
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {                                  
+      'username' : new FormControl(null , Validators.required) ,            // Adding single Validators .
+     } );                                      
+
+  }
+  .
+  .
+  .
+
+```
+### Adding Multiple Validators ###
+
+```javascript
+import { ... ,  Validators } from '@angular/forms';
+
+...
+
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {                                  
+      'username' : new FormControl(null , Validators.required) ,  
+       'email' : new FormControl(null , [Validators.required , Validators.email] ),  //Adding Multiple Validators .
+
+     } );                                      
+
+  }
+  .
+  .
+  .
+```
+# Verifying that validation Works Expected #
+
+* Select any input field in devTools and look the class ng-valid in that .
+
+## Example : Conider username field ##
+
+* Here we have provide only `required` validation . So it should be invalid before entering any value and needs to be turn to valid after entered any value in it .
+
+### Before : ###
+
+<img src="images\Before-invalid.png">
+
+### After : ###
+
+<img src="images\After-Valid.png">
+
+# Reactive Form Getting access to the controls ( Displaying validator error message ) with get method  #
+
+* First provide the validation error message below the input field .
+
+```javascript
+  <div class="form-group">
+
+              <label for="username">Username</label>
+
+              <input type="text"
+               id="username"
+               formControlName="username"
+                class="form-control"
+                >
+
+                <span 
+                class="help-block"                  // Having the validation error message  
+                > Enter User Name ! </span>           
+
+            </div>
+```
+
+* But , we need to only dispay that when the validation get failed . To do this , we have used local references in TemplateDriven method  but here we can not use it .
+
+## Get method () ##
+
+* get() method is used to access the controls in our forms in typescript code . So should provide the path ( sequential property name ) which we want to get access .
+
+* For example , if we want to access the username then , we should get FormGroup and call get method then need to pass 'username' as argument in it .
+
+```javascript
+.
+.
+.
+ <span 
+*ngIf="signUpForm.get('username')"      // If we want another property then we must use correct path in get method argument .
+class="help-block"
+> Enter User Name ! </span>
+.
+.
+.
+```
+## Example : ##
+
+* if we want to display , when the user touched and entered a wrong value or didnot enter any value and move to another fields , then 
+we should use ,
+
+### reactive-forms.component.html ###
+```javascript
+.
+.
+.
+
+ <input type="text"
+id="username"
+ formControlName="username"
+class="form-control"
+>
+
+<span 
+*ngIf="!signUpForm.get('username')?.valid && signUpForm.get('username')?.touched"   //Displying the warning message .
+class="help-block"
+> Enter User Name ! </span>
+
+.
+.
+.
+
+```
+
+## Styling ng-invalid and ng-touched properties using css ##
+
+* We can make the box that is invalid as different color by setting the styles in css .
+
+
+### reactive-forms.component.css ###
+```javascript
+input.ng-invalid.ng-touched{
+    border: 1px solid red;
+}
+```
+# ReactiveForm - Grouping #
+
+## Group in typescript using FormGroup constructor ##
+
+* We can group some required input fields in a group as we did in template-driven approach .
+
+* To do that , we must create a new FormGroup constructor inside the whole FormGroup constructor .
+
+```javascript
+.
+.
+.
+  ngOnInit(): void {
+    this.signUpForm = new FormGroup ( {       
+      'userdata' : new FormGroup({                        // Grouping 
+        'username' : new FormControl( null ,Validators.required) ,                             
+        'email' : new FormControl(null , [Validators.required , Validators.email] ),   
+      })  ,     
+    })
+  }
+.
+.
+.
+```
+## Synchronise in HTML using formGroupName directive ##
+
+* We have only nested in typescript but we should update it in HTML template accordingly . Otherwise , it will show error .
+
+* To do this , initially add a div element which covers the grouping items within it .
+
+* Then , add a formGroupName directive and bind that with the name of group we created in out typescript .
+
+```javascript
+
+<form [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+
+<div formGroupName="userdata">
+
+<div> ... </div>         // binding name and email within userdata
+<div> ... </div>
+
+</div>
+
+</form>
+
+```
+### Note : Upadate Path in get method ###
+
+* Kindly update the path provided in get() according to Objects in typesscript to avoid errors .
+
+* it will not show errors but , the waring message will not be displayed if it is wrong .
+
+* So , kindly update the path in get method according to the formgroup in typescript .
+
+```javascript
+.
+.
+.
+
+*ngIf="!signUpForm.get('userdata.username')?.valid && signUpForm.get('userdata.username')?.touched"
+.
+.
+.
+```
+
+# Reactive Form array of Form Controls #
+
+* To make some formcontrols in array format we should use FormArray constructor in the FormGroup ( Type script ) .
+
+```javascript
+.
+.
+.
+'hobbies' : new FormArray([])                                            
+.
+.
+.
+```
+* To get access to formArray constructor in outside , we should call the path by mention it with array format as below .
+
+* Consider that when a button is clicked the array should be updated to a new form-control.
+
+* So , we need to bind the method with the button and must link the arrayform like below :
+
+```javascript
+.
+.
+.
+
+  ( <FormArray>this.signUpForm.get('hobbies') )    // Get access to the FormArray without any error .
+.
+.
+.
+```
+
+* Hereafter , we can update the array with new form-control using push method as below :
+
+```javascript
+.
+.
+.
+  onAddHobby(){
+    const control = new FormControl(null , Validators.required) ;
+     ( <FormArray>this.signUpForm.get('hobbies') ).push(control);
+  }
+.
+.
+.
+```
+* Synchronise with template to see the result .
+
+```javascript
+<div formArrayName="hobbies">
+       ...
+</div>
+```
+
+* Add the new form control array with dynamic data by user as below :
+
+```javascript
+.
+.
+.
+
+  <div formArrayName="hobbies">
+              <h3> Your Hobbies </h3>
+              <button 
+              class="btn btn-success" 
+              type="button"
+              (click)="onAddHobby()"
+              > Add your hobby </button>
+              <div 
+              class="form-group"
+              *ngFor="let hobbyControl of signUpForm.get('hobbies')?.value; let i = index"
+              >
+                <input type="text" [formControlName]="i">
+              </div>
+            </div>
+.
+.
+.
+
+```
+# Creating custom validators in React Forms #
+
+* Consider that , we should not allow Chris and Anna username . So , we should add validation according to it .
+
+* First initialize the value which we don't want to allow in typescript file .
+
+```javascript
+...
+forbiddeUserNames = ['Chris', 'Anna'] ;
+...
+```
+
+* A validator is simply a function that executed by angular when the validity of form-control is changed .
+
+* The function can be named by us .
+
+* It should containe argument of FormControl .
+
+* It should  return Object of type with key , property value pair of value type boolean .
+
+### Validation function for avoid some usrnames : ###
+
+```javascript
+...
+
+genders = ['Male' , 'Female'];
+signUpForm!: FormGroup;
+forbiddeUserNames = ['Chris', 'Anna'] ;
+.
+.
+.
+  forbiddenNames(control:FormControl) : { [s:string] : boolean } | any {
+   if(this.forbiddeUserNames.indexOf(control.value)) {
+    return {'nameIsForbidden' : true } ;
+   }
+   return null;                                    // return type should be null if validation is successful
+  }
+  .
+  .
+  .
+```
+* Add the function in the validators array where we need to use custom validation.
+
+```javascript
+...
+
+genders = ['Male' , 'Female'];
+signUpForm!: FormGroup;
+forbiddeUserNames = ['Chris', 'Anna'] ;
+.
+.
+'username' : new FormControl( null , [ Validators.required , this.forbiddenNames.bind(this) ] ), 
+// bind(this) --> to identify the correct property 
+.
+  forbiddenNames(control:FormControl) : { [s:string] : boolean } {
+   if(this.forbiddeUserNames.indexOf(control.value) !== -1 ) {       //  !== -1 --> To avoid the all values goes invalid 
+    return { 'nameIsForbidden' : true } ;
+   }
+  return {  }  ;                   // return type should be null if validation is successful
+  }
+  .
+  .
+  .
+```
+# Reactive Form Using ErrorCodes #
+
+* we use our custom Validators to validate some input field to avoid some values as inputs . If the Validation meets is criteria then the angular adds the error codes to us .
+
+* For example , if the user enterd Anna which is not valid in username field , then the error code is set to be true as default . We can get this value in devTools .
+
+* In Devtools , when we select the error code fiels and go to controls , go to userdata , go to username , go to errors ,
+there you can find the error code value .
+
+<img src="images\error-codes.png">
+
+* For other values , the error code is null .
+
+* So , we can use this value to display the difrrent type of warning messages . That means , if username field is empty then "enter a user name " , if it is not valid , then "username id not valid" like this .
+
+```javascript
+.
+.
+.
+  <span 
+ *ngIf="!signUpForm.get('userdata.username')?.valid && signUpForm.get('userdata.username')?.touched"
+class="help-block"
+>  
+<span *ngIf="this.signUpForm.get('userdata.username')?.errors?.['nameIsForbidden']"> This name is invalid ! </span>
+<span *ngIf="this.signUpForm.get('userdata.username')?.errors?.['required']">This field is required !  </span>
+</span>
+.
+.
+.
+
+```
+
+### Validity error message ###
+
+<img src="images\required-error.png">
+
+### Custom error message ###
+
+<img src="images\custon-error.png">
+
+# Creating a custom Asnc Validator in ReactiveForm #
+
+* Asynchronous validators are used to validate some inputs from web servers which will delay ( 1 sec or 2 sec ) to give response .
+
+* Example :  we want to validate the email from webserver .
+
+* As we did for our custom validators , it is also a function and must be attached to our valdiators array with it's reference .
+
+* This function also takes FormControl as an argument .
+
+```javascript
+  forbiddenemail(control:FormControl) {
+...
+  }
+```
+* But , the return type should be asynchronous like promise or Observable . Import Observable form rxjs library .
+
+```javascript
+ forbiddenemail(control:FormControl) : Promise<any> | Observable<any> {
+....
+  }
+```
+
+* Creating a Promise 
+
+```javascript
+  forbiddenemail(control:FormControl) : Promise<any> | Observable<any> {
+   const promise = new Promise<any>(  (resolve , reject) => {} );
+  }
+```
+* In the Promise function , setTimeout() function is executed asynchronouly ( delayed to 1500 milliseconds ) with some consition as below :
+
+```javascript
+  forbiddenemail(control:FormControl) : Promise<any> | Observable<any> {
+   const promise = new Promise<any>(  (resolve , reject) => {
+    setTimeout( () => {
+      if (control.value === 'vijay@g.com'){
+        resolve( { 'emailIsForbidden' : true })
+      }
+      else {
+        resolve (null);
+      }
+    } , 1500 )
+   } );
+   return promise;
+  }
+```
+
+* After creating our own custom Asynchronous validation function , we should add this reference in the input field where we need to do our validation as below :
+
+```javascript
+.
+.
+.
+
+ this.signUpForm = new FormGroup ( {       
+      'userdata' : new FormGroup({                       
+        'username' : new FormControl( null , [ Validators.required , this.forbiddenNames.bind(this) ] ),                             
+        'email' : new FormControl(null , [Validators.required , Validators.email] , this.forbiddenemail ),// Here the function is used
+      })  ,                                                                   
+      'gender' : new FormControl('Male'),
+      'hobbies' : new FormArray([])                                            
+     } );  
+.
+.
+.
+forbiddenemail(control:FormControl) : Promise<any> | Observable<any> {
+   const promise = new Promise<any>(  (resolve , reject) => {
+    setTimeout( () => {
+      if (control.value === 'vijay@g.com'){
+        resolve( { 'emailIsForbidden' : true })
+      }
+      else {
+        resolve (null);
+      }
+    } , 1500 )
+   } );
+   return promise;
+  }     
+```
+
+* But , it will throw an error 
+
+# Status and Value changes in Reactive forms #
+
+* There are two Observables available to identify the status changes and value changes in reactive forms .
+
+* We can use these Observables by subscribing to them and can be able to trace the changes happens .
+
+* Thses two observable can be used for detail view of what happens in form .
+
+```javascript
+.
+.
+.
+
+     this.signUpForm.valueChanges.subscribe(
+      (value) => { console.log(value);
+      }
+     );
+
+     this.signUpForm.statusChanges.subscribe(
+     (status) => { console.log(status);
+     }
+     );
+
+.
+.
+.
+
+```
+# setValue and patchValue #
+
+* setValues is used to set the default values in input fields and patchValue is also used to same process but we can select specific fields in it .
+
+```javascript
+.
+.
+.
+    this.signUpForm.setValue({    // For whole Form
+      'userdata': {
+        'username' : 'vijay',
+        'email' : 'vijay@gmail.com'
+      },
+      'gender' : 'Male',
+      'hobbies' : []
+    }
+     ); 
+
+         this.signUpForm.patchValue({   // For specific values in Form
+      'userdata': {
+        'username' : 'vijay',
+      },
+      
+    }
+     ); 
+  
+.
+.
+.
+
+```
+
