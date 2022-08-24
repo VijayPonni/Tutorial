@@ -4890,3 +4890,687 @@ forbiddenemail(control:FormControl) : Promise<any> | Observable<any> {
 
 ```
 
+# Using Pipes to Transform Output #
+
+## Pipes ##
+
+* Pipes are angular feature which basically allows us to transform output .
+
+## Example : ##
+
+* Consider we have a property called name of type string in typescript.
+
+* We want to display that is our template using string interpolation .
+
+* But , what if ? we should make all the letters to capital while only displaying it in screen without changing the property .
+
+* Here , the builtin pipe `uppercase` come to help .
+
+* We can use the pipe in template with the string that we outputting in screen .
+
+```javascript
+...
+<h1> {{ name | uppercase }}</h1>       // uppercase pipe 
+...
+```
+# Using Pipes #
+
+* Pipes are responsible to transform the values while displaying in screen only . So , logically we should use them in template .
+
+## Example : ##
+
+* Consider the following screen :
+
+<img src="images\pipe-sample-1.png">
+
+```javascript
+...
+ {{ server.instanceType}} |            
+{{ server.started}}
+...
+```
+
+
+* Here we need to display the status in UPPERCASE and date in DATE format .
+
+* To do this without affecting any existing property with inbuilt pipes as below :
+
+### app.componrnt.html ###
+
+```javascript
+...
+ {{ server.instanceType | uppercase }} |            
+{{ server.started  | date }}
+...
+```
+
+<img src="images\pipe-sample-2.png">
+
+# Parametrizing pipes #
+
+* We can pass parametrs to our pipes to modify them more relevent to us .
+
+* We can add parameters After the pipes we declared by seperating with colon ( : ) .
+
+* There are many built-in parametrs for many built-in pipes .
+
+* We can also provide more than one parameter to a single pipe by seperating them by colons .
+
+## Example : ##
+
+* Consider , If we want to display the time in differet format in the below result .
+
+<img src="images\pipe-sample-3.png">
+
+* To do this , we must add parameter in date pipe in template as below : 
+
+```javascript
+...
+{{ server.started  | date:'fullDate' }}   //Adding parametes to pipe 
+...
+```
+* Camelcase is important in the above parameter . Otherwise , the result will not be optained .
+
+* There are lot parameter options .
+
+<img src="images\pipe-sample-4.png">
+
+# The documentaton to know where  built-in pipes and their parameters #
+
+* We can go deeper about pipes in the official documentation . I have provide the link below :
+
+## <a href="https://angular.io/api?query=pipe"> Click me learn more on pipe  { link }</a> ##
+
+<br>
+
+<img src="images\pipe-sample-5.png">
+
+# Chaining multiple pipes #
+
+* We can use more than one pipe in a single property by chaining them with pipe symbol ( | ) .
+
+* Consider , we want to add the uppercase pipe to the date also we can do like below : 
+
+```javascript
+...
+{{ server.started  | date:'fullDate' | uppercase }}
+...
+```
+* Here date also changed to UpperCase :
+
+<br>
+
+<img src="images\pipe-sample-6.png">
+
+# Order while using chaing pipes #
+
+* The order of yhe pipe is applied always `from Left to Right ` .
+
+* Which means , the last pipe is applied to previous value as below :
+
+* Here , the `date` pipe is applied to the propert and `uppercase` pipe is applied to the property which is already applied with date pipe .
+
+* So , the order is important when we use chaining pipes . Otherwise , we will encouter with error .
+
+<br>
+
+<img src="images\pipe-sample-7.png">
+
+# Creating custom ( Own ) Pipe #
+
+* Sometimes , we cannot use the built-in pipes . So , we should use our own custom pipe to acieve the result we wanted .
+
+## Procedure to create own pipe ##
+
+* consider an example , in our below screen we want to display the server name in shrten form .
+
+<br>
+
+<img src="images\pipe-sample-8.png">
+
+
+### 1) Create seperate typescript file for the pipe logic ###
+
+* We should create our new typescrupt file to get our pipe logic with descriptive , meaningful name .
+
+<img src="images\pipe-sample-9.png">
+
+### 2 ) Implement the pipeTransform interface ###
+
+* We must implement the `pipeTransform` interface in out new typescript class which is imorted from @angular/core .
+
+### short-serverstatus.ts ###
+
+```javascript
+import { PipeTransform } from "@angular/core";
+
+export class shortenPipe implements PipeTransform{
+
+}
+```
+### 3 ) Provide transform method ###
+
+* Afetr implemented the pipeTransform interface in our class , the error will show because , we need to use `transform()` method in out class .
+
+```javascript
+import { PipeTransform } from "@angular/core";
+
+export class shortenPipe implements PipeTransform{
+transform(value: any, ...args: any[]) {
+...
+}
+}
+```
+### 4) transform method arguments : ###
+
+* `tranform()` method recives two basic arguments : 
+
+  * value : any --> It is the property we want to transform .
+
+  * argument : any[] --> it takes some arguments if it is needed .
+
+* In our example , we don't want rguments . So we can ignore that :
+
+```javascript
+transform(value: any) {
+    
+}
+```
+### 5 ) return value ###
+
+* The `transform()` method should return a new modified value with the applied featueres which we need using the value parametes.
+
+* In our , example we need to shorten the string . So , i have used `substr()` method on value .
+
+```javascript
+import { PipeTransform } from "@angular/core";
+
+export class shortenPipe implements PipeTransform{
+transform(value: any) {
+   return value.substr(0,5)  + '...';    // logic of our pipe using the value parameter 
+}
+}
+```
+### 6 ) Adding custom pipe file in app.module.ts ###
+
+* We have created our custom pipe . To use this pipe in our template , we should make the angular to know it by make it available in app.module.ts file .
+
+* Add this file in `declarations` array imported form correct path as we do for our components .
+
+```javascript
+...
+import { shortenPipe } from './short-serverstatus';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    shortenPipe,
+  ],
+  ...
+})
+  ...
+```
+### Note : This will show an errro as it does not find any decorator in the pipe file ###
+
+### 7 ) Add decorator in pipe file ###
+
+* In pipe file we only set a logic which we want .
+
+* But , to use this logic in app.module.ts and in our Template we need to add decorator `Pipe` which is imported from angular/core
+
+```javascript
+import { PipeTransform ,Pipe } from "@angular/core";
+
+@Pipe({
+    name : 'shorten'
+})
+
+export class shortenPipe implements PipeTransform{
+transform(value: any) {
+    return value.substr(0,5)  + '...';    // logic of our pipe using the value parameter 
+}
+}
+```
+
+### 8 ) Use custom pipe in template with the name we used in decorator ###
+
+* Finally , To see the changes we made to a specific property in screen we should add our pipe in our template's specific property as we do for built-in pipe with name we used in our decorator .
+
+```javascript
+...
+<strong>  {{ server.name | shorten }} </strong>  // Using the custom pipe in template  { shorten }
+...
+```
+
+### Output : ###
+
+### Before using custom pipe in server name : ###
+
+<br>
+
+<img src="images\pipe-sample-8.png">
+
+<br>
+
+### After using custom pipe in server name : ###
+
+<br>
+
+<img src="images\pipe-sample-10.png">
+
+<br>
+
+# Imporovising our logic for custom pipe  #
+
+* We can improvise our custom pipes in our comfotable format as below : 
+
+* Consider , we want to only show the `...` if only the charecter value exceeds 10 in server name . we can set the condition in pipe file as below :
+
+```javascript
+...
+transform(value: any) {
+    if(value.length > 10 ){
+    return value.substr(0,5)  + '...';    // logic of our pipe using the value parameter 
+    }
+   return value ;
+}
+...
+```
+* If the server name is only `production` { 10 char } and other has more than that , the output will be like below for our condition pipe :
+
+<br>
+
+<img src="images\pipe-sample-11.png">
+
+# Parameterising custom pipe #
+
+* As we pass parametrs in our built-in pipes as below  , We can also add our parametrs to our custom pipe also .
+
+```javascript
+...
+{{ server.started  | date:'fullDate' }}   //Adding parametes to pipe 
+...
+```
+## Procedure to pass parameters to our custom pipes ##
+
+* Consider an example that we want to set the limit of charecters in servername to get the `...` in our template using pipe parameters .
+
+### 1 ) pass the value as second argument in the pipe logic to get the parametrs in our pipe file ###
+
+```javascript
+...
+transform(value: any , limit : number) {
+...
+}
+...
+```
+### 2 ) Provide the necessary logic in the method to use the parmeter ###
+
+```javascript
+...
+transform(value: any , limit : number) {
+    if(value.length > limit ){
+    return value.substr(0,limit)  + '...';    // logic of our pipe using the value parameter 
+    }
+   return value ;
+}
+...
+```
+### 3 ) Pass the parameter in template with appropriate type we set in method parameter ###
+
+```javascript
+...
+  <strong>  {{ server.name | shorten:1 }} </strong>   // Passed parameter as `1` to max char limit of severname `1`
+...
+```
+
+<br>
+
+### Output : ###
+
+<br>
+
+<img src="images\pipe-sample-12.png">
+
+### NOTE : We can add multiple parametrs by adding multiple arguments in method in pipefile ###
+
+<br>
+
+<hr>
+
+<br>
+
+# Creating the filter pipe #
+
+* Consider an example that our task is to make the user to filter the list with status . 
+
+* We can done it with using the pipe by following below Procedures .
+
+### 1 ) Add a new input field to make user type to filter the list ###
+
+```javascript
+...
+<br>
+<input type="text">
+...
+```
+<br>
+
+<img src="images\pipe-sample-13.png">
+
+<br>
+
+### 2 ) Bind the input filed with some empty string initially  ###
+
+```javascript
+...
+ <input type="text" [(ngModel)]="filteredStatus">
+ ...
+```
+
+```javascript
+...
+filteredStatus = '';
+...
+```
+
+### 3 ) Generate your pipe using cli or by your own ###
+
+* To generate pipe with cli , type the following command in appropirate directory .
+
+```javascript
+ng g p <pipename>
+```
+* For our project i named as below : 
+
+```javascript
+ng g p filter
+```
+
+* A new pipe is created with necessary parameters as below :
+
+<br>
+
+<img src="images\pipe-sample-14.png">
+
+* Make sure that the cli automatially added the pipe in app.module.ts . Otherwise do it mannually .
+
+<br>
+
+```javascript
+...
+import { FilterPipe } from './filter.pipe';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    shortenPipe,
+    FilterPipe,
+  ],
+  ..
+})
+  ...
+```
+### 4 ) Creating logic for filter in filter pipe ###
+
+
+```javascript
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipe implements PipeTransform {
+
+  transform(value: any, filterString: string , propName : string): any {
+        if(value.length === 0 || filterString === '' ){
+
+      return value ;
+    }
+    const newArray=[];
+    for(let item of value){
+       if ( item[propName] === filterString ){
+        newArray.push(item);
+       }
+    }
+    return newArray;
+
+  }
+
+}
+
+```
+
+### 5 ) Using the filter pipe in template ###
+
+* We use the pipe to transform the output while display . So we can use it in array also .
+
+* According to our condition , our value is also an array .
+
+```javascript
+...
+  *ngFor="let server of servers | filter:filteredStatus:'status' "
+...
+```
+* The first parametrs represents the  property that stores the input fields value which is passed as an argument in the pipe logic .
+
+* The second parameter represents bywhich arrayelement we need to filter . It takes the `status` for filtering the list . We can also change it .
+
+### Output : ###
+
+<br>
+
+### Before : filter ###
+
+<img src="images\pipe-sample-15.png">
+
+<br>
+
+### After : filter by status ###
+
+
+<img src="images\pipe-sample-16.png">
+
+# Pure and Impure Pipes #
+
+### Limitation while using pipe ###
+
+* The angular pipe will not update the result when it is updated .
+
+* This behaviour is not bad but we can fix it by set the `pure` selector to `false` .
+
+### Example : ###
+
+* Consider the add button to update the tha array with some static value .
+
+* But , it will not seen in the filter .
+
+* But we can make this attaiable by setting the pure selector as `false` in pipe .
+
+<br>
+
+```javascript
+...
+@Pipe({
+  name: 'filter',
+  pure : false
+})
+...
+```
+
+# Understanding Asynchronous pipe ( built-in async pipe ) #
+
+* The built-in async pipe is used to pipe with some properties that are asynchronously like Promise or Observable .
+
+* Consider that we have a property to display by delay of 2 sec . 
+
+* We can use | async pipe to it like below :
+
+### ts file : promise ###
+
+```javascript
+...
+status = new Promise( (resolve,reject) => { 
+  setTimeout( () => {
+    resolve('stable');
+  } ,2000)
+} )
+
+...
+```
+
+### HTML file : adding async pipe to the promise property ###
+
+<br>
+
+```javascript
+...
+<h1> server status : {{ status | async }} </h1>
+...
+```
+<br>
+<hr>
+<br>
+
+# Making Http Requests #
+
+# How to connect Angular with database #
+
+* The angular application needs to be conneted with the backend database to Store and Fetch data . The backend server may be SQL or NOSQL .
+
+* We should not connect our angular application with the database directly as our angular application can be inspected by anyone . So ,
+it is insecure .
+
+* We will request API's instead of servers directly to avoid in security . The API's are like normal websites which provide data in javascipt object format without HTML . So , it is safe .
+
+* We use REST API for our application . We can put and fetch data with http request method and http response method .
+
+* So , we can get access to the database with the mediator called API .
+
+* The database is not only used for simple fetching and storing data but also for file-analytics and file-upload and etc .
+
+<br>
+
+<img src="images/http-1.png">
+
+<br>
+
+# Anatomy of Http Request #
+
+* URL ( API endpoint )  --> It is URL or website of our API .
+
+* Http Verb --> It defines the which kind of request we want to send to API { POST , GET , PUT } . It deponds on the API endpoint .
+
+* Header ( Meta Data ) --> Angular sets a default header but sometimes we can also set the header for our http request .
+
+* Body --> It holds the data information of our each http request . It can used with POST , PUT , PATCH , etc .
+
+<br>
+
+<img src="images/http-2.png">
+
+# Creating API in firebase #
+
+* Visit firebase website and login with your google accout .
+
+<image src="images/http-3.png">
+
+<br>
+
+* Click on add project to setup the new projet in firease .
+
+<image src="images/http-4.png">
+
+<br>
+
+* Name your project as you want and accept the terms and conditon and give create project . It will create a new project as below : 
+
+<img src="images/http-5.png">
+
+<br>
+
+* Once you click the continue , the interface will be shown like below : 
+
+<br>
+
+<img src="images/http-6.png">
+
+<br>
+
+* Go to Build  section , and select the Realtime database .
+
+<br>
+
+<img src="images/http-7.png">
+
+<br>
+
+* The Realtime database section will look like below : 
+
+<img src="images/http-8.png">
+
+<br>
+
+* Click `create database ` 
+
+* It will ask for the location to store our database . Selet any one .
+
+* Then , it will ask for `mode` like below :
+
+<br>
+
+<img src="images/http-9.png">
+
+* Choose `testMode` for our usecase and click enable .
+
+<br>
+
+<img src="images/http-10.png">
+
+<br>
+
+* We created our URL to  fetch and receive data : 
+
+<br>
+
+<img src="images/http-11.png">
+
+# Sending a Post Request #
+
+* To send request to any API , we must import a Module called `httpClientModule` in our app.module.ts from `@angular/common/http`
+
+<br>
+
+### app.module.ts ###
+
+```javascript
+import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpClientModule          // to handle http requests 
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+
+
+
+
+
+
+
+
