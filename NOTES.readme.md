@@ -5565,6 +5565,1201 @@ import { AppComponent } from './app.component';
 })
 export class AppModule { }
 ```
+# 1 ) inject http client #
+
+* To use the http services , we must inject it our typescript to use this .
+
+```javascript
+...
+import { HttpClient } from '@angular/common/http';
+.
+.
+.
+constructor(private http: HttpClient) {}       // Injecting hhtp clinet
+
+ngOnInit() {}
+...
+```
+
+# 2 ) Choose method you want #
+
+* While using the http variable  we imported , we should decide which method we want to use according to our necessity . 
+
+* There are many method available like below : 
+
+<br>
+
+<img src="images/http-12.png">
+
+* The above methods are mostly named like http verbs we have seen while we learn `anatomy of http` .
+
+* So , these methods allow us to sent various requests to the server .
+
+* Now , we want to `store` our data in the database . So must choose `POST` method .
+
+<br>
+
+```javascript
+...
+ onCreatePost(postData: { title: string; content: string }) {
+  this.http.post() ;
+  }
+...
+```
+# 3 ) Pass arguments to the method #
+
+* The Post method takes the two arguments . One is `request url` and another one is `request body` .
+
+## 1 st request url argument ##
+
+* we should pass argments to our post method . The first argument is `url`
+
+* As we use the firebase as server , we can use the url provided by firebase which we got .
+
+<br>
+
+<img src="images/http-13.png">
+
+<br>
+
+```javascript
+...
+  this.http.post(
+    'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/',
+  
+  ) 
+  ...
+```
+<br>
+
+* But in most cases ( In rest API ) , we must specify the extra extension with the url like `url/POST` or `url/GET/..` 
+
+* Firebase also requires to add extension that specifies service and format . 
+
+* As we use POST service ( we should proide posts/.json ) extension to the url .
+
+<br>
+
+```javascript
+...
+  this.http.post(
+'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+) 
+...
+```
+<br>
+
+<img src="images/http-14.png">
+
+## 2 nd reuest body argument ##
+
+* The `request body` argument is the data which we want to store in the server .
+
+* Usually it should be in the JSON format . But , angular automatically transforms it to JSON if we pass Object .
+
+<br>
+
+```javascript
+  onCreatePost(postData: { title: string; content: string }) {
+  this.http.post(
+    'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+   postData
+  ) 
+  }
+```
+# Subscribing to the request #
+
+* Angular http request are heavily used by observable as they want to subscribe to them .
+
+* If we want to get `response` ( For `POST` the response is `Store Data` )  from server , we want to subscribe to our `request` .
+
+* Even the `request` will not been sent to the server if we didnot `subscribe` to our `request` .
+
+* We can see that `post` method itself forces an return observable .
+
+<br>
+
+<img src="images/http-15.png">
+
+<br>
+
+```javascript
+  onCreatePost(postData: { title: string; content: string }) {
+  this.http.post(
+    'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+   postData
+  ).subscribe(
+responseData => { console.log(responseData) }     // Simply printing the response data in subscribe method .
+  );
+
+  }
+```
+
+<br>
+
+# Verifying wheather the requet has sent or not ? in developer tools network tab #
+
+* First clear the deafaut data in devttols before sending an request by clicking the button .
+
+<br>
+
+<img src="images/http-16.jpg">
+
+<br>
+
+<br>
+
+<img src="images/http-17.png">
+
+<br>
+
+<br>
+
+
+* Send a request and verify the `network tab`
+
+<br>
+
+<img src="images/http-18.png">
+
+<br>
+
+* Always two request has been sent when we use post request as we see in the browser .
+
+* The first request is an `Option` which verifies that the `POST` request is allowed or not and it get successed if so .
+
+<br>
+
+<img src="images/http-19.png">
+
+* The second request is the actual post request which consists of request url we sent , requst method , status , response header ( host ) ,request headeres ( Automaticlly added by angular ) and paylod ( source of the request ( data ))
+
+<br>
+
+<img src="images/http-20.png">
+
+<br>
+
+<br>
+
+<img src="images/http-21.png">
+
+<br>
+
+<br>
+
+* In our firebase : 
+
+<br>
+
+<img src="images/http-22.png">
+
+<br>
+
+
+# Getting data #
+
+<br>
+
+* To get all the data we posted in our database , we should use `get` http request .
+
+<br>
+
+```javascript
+...
+ private fetchPosts(){
+     this.http.get()
+  }
+...
+```
+<br>
+
+* The `get` method only recicves one argument that is the `request url` from the database where we posted the data .
+
+<br>
+
+```javascript
+...
+  private fetchPosts(){
+     this.http.get(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     )
+  }
+...
+```
+
+<br>
+
+### Note : We should not alternate the extension in the url because we want to get the data from the posts.json itself ###
+
+* The firebase will craete a seperate folder in the url by appending with it .
+
+<br>
+
+<img src="images/http-14.png">
+
+<br>
+
+<img src="images/http-23.png">
+
+<br>
+
+<br>
+
+* Subscribe to the request to get the response .
+
+<br>
+
+
+
+```javascript
+...
+  private fetchPosts(){
+     this.http.get(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     ).subscribe(
+      posts => { console.log(posts) }     // Just displaying the data from database 
+     )
+  }
+...
+```
+
+<br>
+
+
+* I have called this method in `ngOnInit()` and also anothe button click event in template . SO that only , i have made it as seperate method to reuse it in multiple times.
+
+<br>
+
+```javascript
+...
+ ngOnInit() {
+    this.fetchPosts();
+  }
+
+...
+  onFetchPosts() {
+    this.fetchPosts();
+  }
+...
+ private fetchPosts(){
+     this.http.get(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     ).subscribe(
+      posts => { console.log(posts) }     // Just displaying the data from database 
+     )
+  }
+
+```
+
+<br>
+
+### Console output of data get ###
+
+<br>
+
+* As we used our method in ngOnInit , it will get our data when it reloaded itseld . 
+
+* Also we can get it by clicking the button also where we set the click event to it .
+
+<br>
+
+<img src="images/http-24.png">
+
+<br><br>
+
+# Using Rxjs Operators to transform response data #
+
+<br>
+
+# Analysing the obtained response data #
+
+<br>
+
+* The Response data is of type object which holdes a `key` as an encrypted key and the `value` as our `posted data` in object method .
+
+<br>
+
+<img src="images/http-25.png">
+
+<br>
+
+<img src="images/http-26.png">
+
+<br>
+
+# Changing the response data to an array instead Object using pipe() with map() operator #
+
+* As the response data is in the `object` notation , we have not any advanced opeartions to access our data .
+
+* But , `array` has some map , filter , reduce and etc operations with it .
+
+* In order to utilize the features for our response data , we should change our data to an  array format .
+
+* We can do it using the `pipe()` which transforms the data to something .
+
+* As we learned it Observable , we can use our `pipe()` method for our responseDta `before subscribe` to it .
+
+<br>
+
+```javascript
+  private fetchPosts(){
+     this.http.get(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     ). 
+     pipe()                                 // Using pipe method 
+     .subscribe(
+      posts => { console.log(posts) }    
+     )
+  }
+```
+
+<br>
+
+* We can use the `map()` operator to iterate each elements and import it from `rxjs/operators`
+
+```javascript
+...
+import { map } from 'rxjs/operators';
+...
+pipe( map() )                                 // Using pipe method 
+...
+```
+<br>
+
+* `map()` itself expects another function as argument which contains the logic and that returns the modified array forwhich array we give our map() .
+
+<br>
+
+```javascript
+...
+ map( () => {} )
+...
+```
+
+<br>
+
+```javascript
+  private fetchPosts(){
+     this.http.get(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     ).
+     pipe( 
+      map(
+        
+        (responseData : any) => { 
+        const postArray = [] ;
+         for (const key in responseData){
+
+          if(responseData.hasOwnProperty(key)){
+            
+          postArray.push( { ...responseData[key] , id:key } );
+         }
+         }
+        return postArray;
+      }
+          )
+       )                                 // Using pipe method 
+     .subscribe(
+      posts => { console.log(posts) }    
+     )
+  }
+```
+
+<br>
+
+* Now , we have changed the Object to array format as below : 
+
+<br>
+
+<img src="images/http-27.png">
+
+<br>
+
+<img src="images/http-28.png">
+
+<br>
+
+<img src="images/http-29.png">
+
+<br>
+
+# Using types with http client #
+
+<br>
+
+* We can get our response data but , angular does not know the type of that which means it only knows that the response data is `object` but not `format that the object look like` .
+
+* So , we should make this possible in several ways .
+
+## Specifying the type while passing it as argument in map() iteslf ##
+
+<br>
+
+* We have specified as `any` in there . But , it is wrong .
+
+<br>
+
+<img src="images/http-30.png">
+
+<br>
+
+* Instead of that , we should pass the format of our Object ( response data ) .
+
+* It should be a type of Object that holds `property` as our key and `value` as `format of our object we  want` .
+
+<br>
+
+```javascript
+...
+(responseData : { [key:string] : ...  }  ) => 
+...
+```
+
+<br>
+
+<img src="images/http-31.png">
+
+<br>
+
+* So , on the value we cannot add directly the format . We have represented the format while we posted it as below :
+
+<br>
+
+```javascript
+...
+  onCreatePost( postData: { title: string; content: string }) 
+...
+```
+
+<br>
+
+* To use the format in every place in our code , we sould keep it in seperate file as below :
+
+<br>
+
+<img src="images/http-32.png">
+
+* Now we can use the variable whereever we need it in our typescript code and imort it from corresponsiting directory .
+
+<br>
+
+```javascript
+...
+import { Post } from './post.model';.
+...
+onCreatePost(postData:Post) { ...
+}
+.
+.
+.
+ private fetchPosts(){
+   ...
+     pipe(   )
+      map(
+        
+        (responseData : { [key:string] : Post } | any  ) => { 
+        const postArray : Post[] = [] ;
+
+       ...} )
+  }
+ ...
+
+
+```
+
+<br>
+
+<img src="images/http-33.png">
+
+<br>
+
+
+
+# Specifying type in the method itselt with <> and use of model.ts file #
+
+* As we know , we have created the formart for our response data object notation in seperate moel.ts file .
+
+* We can use it when they call the methods like GET , POST , etc by insetting `<..>` in it .
+
+<br>
+
+```javascript
+...
+...
+import { Post } from './post.model';
+....
+  this.http.post<{name : string}>
+  .
+  .
+  .
+ private fetchPosts(){
+     this.http.get<{ [key:string] : Post }>(
+     )...
+  }
+
+```
+<br>
+
+* This will avoid unnecessary typescript errors .
+
+<br>
+
+# Outputting Posts #
+
+<br>
+
+* We have get our data with all necessary states and elegant way . Now we should use the data in our template insted of displaying it in the console :
+
+### The method to get data : ###
+
+<br>
+
+```javascript
+  private fetchPosts(){
+     this.http.get<{ [key:string] : Post }>(
+      `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+     ).
+     pipe( 
+      map(
+        
+        responseData  => { 
+        const postArray : Post[] = [] ;
+         for (const key in responseData){
+
+          if(responseData.hasOwnProperty(key)){
+            
+          postArray.push( { ...responseData[key] , id:key } );
+         }
+         }
+        return postArray;
+      }
+          )
+       )                                
+     .subscribe(
+      posts => { console.log(posts) }     // just displayig the data in console .
+     )
+  }
+```
+
+<br>
+
+* As we changed the fetching data to Array , we should declare an array of type ( we created in model ) and set the value equals to the fetching data as below :
+
+<be>
+
+```javascript
+...
+import { Post } from './post.model';
+.
+.
+.
+export class AppComponent implements OnInit {
+
+  loadedPosts : Post[] = [];          // New array to store coming array
+...
+  private fetchPosts(){
+   .
+   .
+   .
+     .subscribe(
+      posts =>
+       {
+        this.loadedPosts = posts;   // Assiging to the local array .
+        console.log(posts);          // displaying in console 
+         }    
+     )
+  }
+
+
+}
+
+```
+
+* Now we have data as array in our typescript . So we can easily display them in template according to our format .
+
+<br>
+
+### Template to display the fetched data which is array format in typescript ###
+
+<br>
+
+```javascript
+...
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+      <p *ngIf="loadedPosts.length < 1 "> No posts available! </p>
+      <div *ngIf="loadedPosts.length >=1 ">
+        <div *ngFor="let post of loadedPosts">
+          <h3> {{ post.title }}</h3>
+          <p> {{ post.content }} </p>
+        </div>
+      </div>
+...
+```
+
+<br>
+
+<img src="images/http-34.png">
+
+<br>
+
+# Showing a loading indicator #
+
+<br>
+
+### template : ###
+
+<br>
+
+```javascript
+
+  <div class="row">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+
+      <p *ngIf="isFetching">Loading ...</p>
+
+      <p *ngIf="loadedPosts.length < 1 && !isFetching"> No posts available! </p>
+      <div *ngIf="loadedPosts.length >=1 && !isFetching">
+        <div *ngFor="let post of loadedPosts">
+          <h3> {{ post.title }}</h3>
+          <p> {{ post.content }} </p>
+        </div>
+      </div>
+     
+      
+    </div>
+  </div>
+```
+<br>
+
+### The isFetching property in typescript ( We can use any property name ) ###
+
+<br>
+
+```javascript
+...  
+  isFetching = false ;        // Initializing with false 
+.
+.
+.
+private fetchPosts(){
+    this.isFetching = true ;        // setting to true only fetching .
+     ....
+     .subscribe(
+      posts =>
+       {
+        this.isFetching = false ;      // Setting again to false after fetched 
+        ..
+       }
+     )
+
+```
+
+<br>
+
+### NOte : The firebase will fetch the data in very fast manner . If you want to view the loading text try in slow 3g or less internet connection ###
+
+<br>
+
+# Using services for Http Requests #
+
+## But we will lost our connection with the data in database , we will fix it in next section . Kindly follow : ##
+
+<br>
+
+* The services file offers us to keep the extra operations in seperate file which are mostly not related to the template like ftching the information and ect .
+
+<br>
+
+## posts.service.ts file ##
+```javascript
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { map } from "rxjs/operators";
+import { Post } from "./post.model";
+
+@Injectable( { providedIn : 'root'} )
+
+export class PostsService{
+
+   constructor(
+    private http : HttpClient
+   ){}
+
+   isFetching = true ;
+   loadedPosts : Post[] = [];
+
+    createAndStore( postData : Post ){
+        this.http.post<{name : string}>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+           postData
+          ).subscribe(
+        responseData => { console.log(responseData) }     // Simply printing the response data in subscribe method .
+          );
+    }
+
+
+    fetchPost(){
+        this.http.get<{ [key:string] : Post }>(
+            `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+           ).
+           pipe( 
+            map(
+              
+              responseData  => { 
+              const postArray : Post[] = [] ;
+               for (const key in responseData){
+      
+                if(responseData.hasOwnProperty(key)){
+                  
+                postArray.push( { ...responseData[key] , id:key } );
+               }
+               }
+              return postArray;
+            }
+                )
+             )                                 // Using pipe method 
+           .subscribe(
+            posts =>
+             {
+              this.isFetching = false ;
+              this.loadedPosts = posts;
+               console.log(posts);
+               }    
+           )
+        
+    }
+}
+```
+
+<br>
+
+## Using the service in our component.ts file : ##
+
+<br>
+
+```javascript
+import { Component, Injectable, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Post } from './post.model';
+import { PostsService } from './posts.service';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+
+
+export class AppComponent implements OnInit {
+  loadedPosts : Post[] = [];
+  isFetching = false ;
+
+  constructor( 
+    private http: HttpClient ,
+    private postService : PostsService
+    ) {}      
+
+  ngOnInit() {
+    this.postService.fetchPost();
+  }
+
+  onCreatePost(postData:Post) {
+    this.postService.createAndStore(postData);
+
+  }
+  onFetchPosts() {
+    this.postService.fetchPost();
+   
+  }
+
+  onClearPosts() {
+    // Send Http request
+  }
+
+
+
+
+}
+
+```
+
+<br>
+
+# Services and components working together #
+
+<br>
+
+* While fetching , the template searches for the array value in the funtion . But , it is unable to find the fetched value from services method where we subscribe to it .
+
+* We can rectify this by `return` the function for fetch data in `service` and `subscribe` to the function in `comonent` as below :
+
+<br>
+
+## Sercive file : ##
+
+```javascript
+...
+    fetchPost(){
+        return this.http.get<{ [key:string] : Post }>(
+            `https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json`
+           ).
+           pipe( 
+            map(
+              
+              responseData  => { 
+              const postArray : Post[] = [] ;
+               for (const key in responseData){
+      
+                if(responseData.hasOwnProperty(key)){
+                  
+                postArray.push( { ...responseData[key] , id:key } );
+               }
+               }
+              return postArray;
+            }
+                )
+             )                                 // Using pipe method 
+    
+        
+    }
+    ...
+```
+
+<br>
+
+
+## subscribing to the method in component as below : ##
+
+* we should subscribe whereever we call the fetch method in component.ts file as below : 
+
+<br>
+
+```javascript
+...
+export class AppComponent implements OnInit {
+  loadedPosts : Post[] = [];
+  isFetching = false ;
+
+...
+
+  ngOnInit() {
+    this.postService.fetchPost().subscribe(
+      posts =>
+       {
+        this.isFetching = false ;
+        this.loadedPosts = posts;
+         console.log(posts);
+         }    
+     );
+  }
+
+  ...
+
+  }
+  onFetchPosts() {
+    this.postService.fetchPost().subscribe(
+      posts =>
+       {
+        this.isFetching = false ;
+        this.loadedPosts = posts;
+         console.log(posts);
+         }    
+     );;
+   
+  }
+
+}
+
+```
+
+<br>
+
+# Sending a Delete Request #
+
+<br>
+
+* If we want delete the databasse it is simple as follow :
+
+<br>
+
+### service  ###
+
+```javascript
+...
+  clearPost(){        
+     return this.http.delete < { [key:string] : Post } > (
+        'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+      )
+      
+    }
+...
+```
+
+<br>
+
+### component.ts file : ###
+
+```javascript
+...
+  onClearPosts() {
+    // Send Http request
+    this.postService.clearPost().subscribe(
+     () => {
+     this.loadedPosts = [] ;
+     }
+   
+    );
+  }
+...
+```
+
+<br>
+
+# Handling error #
+
+<br>
+
+# Handling error #
+
+<br>
+
+* While interacting with servers , we may encounter with lots of error like internet connection failure , Authentication error , invalid data and etc .
+
+* We can manage our errors to improve the user experience .
+
+* Inrder to handle those error we have got lots of methosds .
+
+* Since we using firebase for our database ( There will be no authenticatin error ) . To handle the erros , we can just fake authentication error in firebase as below :
+
+## Create authntication error in firebase ( Faking ) ##
+
+<br>
+
+* Go to `rules` tab in firebase :
+
+<br>
+
+<img src="images/http-35.png">
+
+<br>
+
+<img src="images/http-36.png">
+
+<br>
+
+* Change the `read` value to `false`
+
+<br>
+
+<img src="images/http-37.png">
+
+<br>
+
+* Click `publish` button .
+
+<br>
+
+<img src="images/http-38.png">
+
+<br>
+
+* Finally we faked the error in our browser as below :
+
+<br>
+
+<img src="images/http-39.png">
+
+<br>
+
+# Handling errors in subscribe method itself #
+
+<br>
+
+* As we can pass more than one arguments ( function ) to the `subscribe` , we should handle the `errors`  as second function .
+
+<br>
+
+```javascript
+  onFetchPosts() {
+    this.postService.fetchPost().subscribe(
+      posts =>
+       {
+        this.isFetching = false ;
+        this.loadedPosts = posts;
+         console.log(posts);
+         },
+         err => {}           // Handling error as secod arguments while subscribing 
+     )
+   
+  }
+```
+
+<br>
+
+* Create any template to handle error and initially sets a propert to `null` { here our property is `error`} and only display the template when it goes `true` { That means when `error occures`}
+
+<br>
+
+### Template to show alert message ###
+
+<br>
+
+```javascript
+
+<p *ngIf="isFetching && !error">Loading ...</p>
+<div class="alert alert-danger" *ngIf="error">
+        <h1> An Error Occured ! </h1>
+        <p> {{ error  }} </p>
+      </div>
+```
+
+<br>
+
+### error function in typescript file whereever we call the fetch method ###
+
+<br>
+
+* Initially set the error value to `null` and update it to `error.message` which wil return an error message if use it in error method .
+
+<br>
+
+```javascript
+...
+  error = null;
+
+ ngOnInit() {
+    this.postService.fetchPost().subscribe(
+      posts =>
+       {
+        this.isFetching = false ;
+        this.loadedPosts = posts;
+         console.log(posts);
+         } ,
+         error => { this.error = error.message }           // Handling error as secod arguments while subscribing 
+
+     );
+  }
+...
+  onFetchPosts() {
+    this.postService.fetchPost().subscribe(
+      posts =>
+       {
+        this.isFetching = false ;
+        this.loadedPosts = posts;
+         console.log(posts);
+         },
+         error => { this.error = error.message }           // Handling error as secod arguments while subscribing 
+     )
+   
+  }
+
+```
+
+<br>
+
+# The result screen #
+
+<br>
+
+<img src="images/http-40.png">
+
+<br>
+
+# To know more information about error handling regarding error details : #
+
+<br>
+
+* If we want to get the information , we can see in the console by consoling the error in the error object as below :
+
+<br>
+
+```javascript
+  error  => { 
+ console.log(error);       // To console the erro details 
+this.error = error.message
+}             // Handling error as secod arguments while subscribing 
+```
+<br>
+
+<img src="images/http-41.png">
+
+<br>
+
+# Using Subjects for handling error #
+
+<br>
+
+* If we do not use subscribe in component.ts file but we subscribe in service file ( Consider an example post method ) . In post method , we only subscribe in service file . There we can use Subjects to handle the error .
+
+<br>
+
+```javascript
+...
+import { Subject } from 'rxjs';
+
+@Injectable( { providedIn : 'root'} )
+
+export class PostsService{
+
+  ...
+error = new Subject<string>();      // Initilaizing subject 
+ 
+    createAndStore( postData : Post ){
+        this.http.post<{name : string}>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+           postData
+          ).subscribe(
+        responseData => { console.log(responseData) }   , 
+        (error) => { this.error.next(error.message) }       // error handling using subject 
+          );
+    }
+.
+.
+.
+```
+
+<br>
+
+* But to Provide use this in our template , we should subscribe to this error method in  ts .
+
+* In our example , we should use in ngOnInit .
+
+<br>
+
+```javascript
+...
+ngOnInit() {
+  ...
+this.postService.error.subscribe(
+errorMessage => { this.error = errorMessage }
+);
+
+...
+}
+```
+
+<br>
+
+# Using the Catch error Operator #
+
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
