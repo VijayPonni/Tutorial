@@ -6746,6 +6746,365 @@ errorMessage => { this.error = errorMessage }
 
 <br>
 
+* catchError is a special operator that need to be imported from 'rxjs/operators' .
+
+* To use this method , we need to import throwError obderable from 'rxjs' .
+
+* We should pass this this an second argument to our subscripion method .
+
+<br>
+
+```javascript
+...
+import { catchError, map } from "rxjs/operators";
+import { Subject, throwError } from 'rxjs';
+.
+.
+.
+fetchPost(){
+     (...
+          ),
+          catchError( errorRes => {
+            // Send analytic to server 
+            return throwError(errorRes)
+          }) 
+}    
+
+```
+
+<br>
+
+# Error Handling and UX #
+
+<br>
+
+* We should make the yser avoid the error ay clicking any button . So need to set the error property to null in method we executing when button is clicked .
+
+<br>
+
+```javascript
+<div class="alert alert-danger" *ngIf="error">
+       ...
+        <button class="btn btn-warning" (click)="onAvoidError()"> Okay ! </button>
+</div>
+```
+
+<br>
+
+```javascript
+  onAvoidError(){
+    this.error=null;
+  }
+```
+<br>
+
+# Setting Headers #
+
+<br>
+
+* In somecases , the ApI we interact need custom headers to offer something to us or whatevet may be . 
+
+* We can make the custom headers of key , value pairs .
+
+* We can pass our header key , value pair as an arguments to any methods ( Fetch , delete , patch , get , etc ) like the endpoint url .
+
+* We can pass the arguments as { ... } . within that there are bunch of functinalities available that we can utilize .
+
+* `headers` is one among them and that gets a value of HttpHeaders which is iported from 'http/common' .
+
+* It should be initiated with new keyword .
+
+* Inside the `HttpHeaders` we can pass our key , value pairs of our custom headers .
+
+<br>
+
+```javascript
+...
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+.
+.
+.
+ fetchPost(){
+        return this.http.get<{ [key:string] : Post }>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+            {
+            headers : new HttpHeaders( { "custome Header" : "vijay Header"})  // Setting custom headers 
+            }
+           ).
+           pipe( ..)
+ }
+ ...
+```
+<br>
+
+### Note : The header name must be without space or words should be seperated by `-` Otherwise it will show error ###
+
+<img src="images/http-42.png">
+
+<br>
+
+# Adding query parameters #
+
+* We can also add queryParams as we did headers . 
+
+* For example , if we want to add `print=pritty` queryparams to our url we can make it using the same procedure .
+
+* We can also make it by addig it in the end of url . But it wil not be convienet .
+
+* Like httpHeaders , `HttpParams` need to be imported from 'http/common' .
+
+* And call set method to pass the property and value of our query params .
+
+<br>
+
+```javascript
+...
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
+.
+.
+.
+ fetchPost(){
+        return this.http.get<{ [key:string] : Post }>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+            {
+            headers : new HttpHeaders( { "custome Header" : "vijay Header"}),  // Setting custom headers 
+            params : new HttpParams().set('print','pretty'),
+            }
+           ).
+           pipe( ..)
+ }
+ ...
+```
+
+<br>
+
+### Before adding print=pretty query params ###
+
+<br>
+
+<img src="images/http-43.png">
+
+<br>
+
+### After adding print=pretty query params ###
+
+<br>
+
+<img src="images/http-44.png">
+
+<br>
+
+# Adding multiple queryParams #
+
+<br>
+
+* It is similar to the above one . the thing is we initiate the method with a variable and call it with multiple data .
+
+* We use `append()` to store params in one variabe .
+
+* Assign the variable with  `params` property inside arguments group as we did for single qeryparams .
+
+<br>
+
+```javascript
+...
+   fetchPost(){
+        let searchParams = new HttpParams();
+        searchParams = searchParams.append('print', 'pretty');
+        searchParams = searchParams.append('custom', 'params');
+
+        return this.http.get<{ [key:string] : Post }>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+            {
+            headers : new HttpHeaders( { "customeHeader" : "vijay Header"}) , // Setting custom headers 
+            params : searchParams   // Multiple params 
+            // params : new HttpParams().set('print','pretty'),
+            })
+}
+...
+```
+
+<br>
+
+### Result : ###
+
+<br>
+
+<img src="images/http-45.png">
+
+<br>
+
+# Observing differnet types of responses #
+
+<br>
+
+* Usually , the `response` for our `request` will be the data that actullay needed . We will map to it and use it .
+
+* But in some specific cases , we may want to access the `status code` and ` response header` of our data . We cannot handle those data in ordinary response data provided by the database with the oridinary method .
+
+* Inorder to get the response data with all it's extra information , we should use `observe` method .
+
+* The `observe` is the part of an extra argument bunch like `headers` and `params` .
+
+* So , we need to use this any request methods argument bunch as a property .
+
+* Let us take a `GET` method and try this in it as below :
+
+<br>
+
+<br>
+
+```javascript
+...
+    createAndStore( postData : Post ){
+        this.http.post<{name : string}>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+           postData,
+           {
+            observe : 'body'         // observe:'value' to get  usual response data .
+           }
+          ).subscribe(
+        responseData => { console.log(responseData) }   ,    // Printing the response data in console .
+        (error) => { this.error.next(error.message) }
+          );
+    }
+...
+```
+<br>
+
+### Note : `body` is the default value for `observe` property ###
+
+* It will display the response as we usually see in the browser .
+
+<br>
+
+<img src="images/http-46.png">
+
+<br>
+
+# observe : 'response' #
+
+<br>
+
+* `reponse` is the another important value for `observe` which gives the meta data of our response data .
+
+<br>
+
+```javascript
+  createAndStore( postData : Post ){
+        this.http.post<{name : string}>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+           postData,
+           {
+            observe : 'response'         // observe : 'response' to get full response data with extra information .
+           }
+          ).subscribe(
+        responseData => { console.log(responseData) }   , 
+        (error) => { this.error.next(error.message) }
+          );
+    }
+```
+
+<br>
+
+<img src="images/http-47.png">
+
+<br>
+
+## Important Note : ##
+
+* If we use `response` , we are accessable to all the every other properties like `headers` , `status` , and etc .
+
+* But if we want to access usual response , we must specify it with `body` .
+
+<br>
+
+```javascript
+ createAndStore( postData : Post ){
+        this.http.post<{name : string}>(
+            'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+           postData,
+           {
+            observe : 'response'         // observe : 'response' to get full response data with extra information .
+           }
+          ).subscribe(
+        responseData => { 
+            console.log(responseData.body)      // Specify which property you need to access in the response data.
+            console.log(responseData.status);
+            console.log(responseData.headers);
+            console.log(responseData.statusText);
+            }   ,      
+        (error) => { this.error.next(error.message) }
+          );
+    }
+```
+
+<br>
+
+### Output : ###
+
+<br>
+
+<img src="images/http-48.png">
+
+<br>
+
+# response : 'events' #
+
+<br>
+
+* `events` are not mostly used . It is used only in few cases where we want control on our request status or something .
+
+* If we console the event , it will give two outputs as below :
+
+<br>
+
+```javascript
+...
+import { catchError, map ,tap} from "rxjs/operators";
+...
+ clearPost(){        
+     return this.http.delete < { [key:string] : Post } > (
+        'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+        {
+            observe : 'events'           // Using 'events'
+        }
+      ).pipe(
+        tap( event => {console.log(event);            // Displaying the response data events in console 
+        } )
+      )
+      
+    }
+```
+
+### NOte : As we do not subscribe to the delete in services , we use pipe tap method which allows to do some action with response data that will not affect the subscription . So only we have used here .###
+
+<br>
+
+### Output : ###
+
+<br>
+
+<img src="images/http-49.png">
+
+<br>
+
+* From the above image we can confirm that both output are from same line .
+
+* The second one is usual response data . But first one is an object `type` which has value in numbers .
+
+## Accessing the events with type ##
+
+<br>
+
+* To handle the events , we should access the type with `HttpEventType` 
+
+
+
+
+
+
+
 
 
 
