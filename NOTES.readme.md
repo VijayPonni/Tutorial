@@ -7097,7 +7097,395 @@ import { catchError, map ,tap} from "rxjs/operators";
 
 <br>
 
-* To handle the events , we should access the type with `HttpEventType` 
+* To handle the events , we should access the type with `HttpEventType` .
+
+* This should be imported from 'angular/http/common' .
+
+<br>
+
+<img src="images/http-50.png">
+
+<br>
+
+* The above are the list htppEvents available each one is represented with array of elements that in the console .
+
+<br>
+
+```javascript
+...
+   clearPost(){        
+     return this.http.delete < { [key:string] : Post } > (
+        'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
+        {
+            observe : 'events'           // Using 'events'
+        }
+      ).pipe(
+        tap( 
+            event => {
+              if(event.type === HttpEventType.Sent){
+                console.log(event.type);
+                // .. we can see the response data status 
+              }
+                if(event.type === HttpEventType.Response){
+                  console.log(event.body);
+                }
+                           
+        } )
+      )
+      
+    }
+
+..
+```
+
+<br>
+
+# Changing the Response body type #
+
+<br>
+
+* We can also configure the `response type` of our response data .
+
+* The default value is `json` . But , we can change it to text,bloob or something according to our needs .
+
+* But , in most cases we will use only json . We will not change it .
+
+<br>
+
+```javascript
+...
+  {
+            observe : 'events'  ,        
+            responseType : 'json'   // responseType 
+        }
+...
+```
+
+<br>
+
+### Note : The response type should not be varied in two places , If so , it will show error ###
+
+<br>
+
+# Interceptors #
+
+<br>
+
+* interceptors are used to configure all the request with the same header that the Backend can get access it ( API ) .
+
+* It is used to `Authenticate` a user  .
+
+<br>
+
+# Creating a basic interceptor example : #
+
+<br>
+
+* Create a seperate file with valuable name which will contain the functions of interceptors .
+
+* The file should hava a class and that should be implement the `HttpInterceptor` which is imported form '@angular/common/http' .
+
+<br>
+
+### auth-interceptor.service.ts ###
+
+```javascript
+import { HttpInterceptor } from "@angular/common/http";
+
+export class AuthInterceptorService implements HttpInterceptor {
+    
+}
+```
+
+<br>
+
+* The interface forces us to implement `intercept` method .
+
+<br>
+
+```javascript
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
+import { Observable } from "rxjs";
+
+export class AuthInterceptorService implements HttpInterceptor {
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        ...
+    }
+}
+```
+
+<br>
+
+# intercept() method : #
+
+<br>
+
+* The intercept() method receives two arguments : 
+
+ * request .
+
+ * next .
+
+<br>
+
+## requset ##
+
+<br>
+
+* This is generic type of request that we obtain and must of type `HttpRequest<any>` , the `any` is responsible for any type of retriving object .
+
+<br>
+
+## next ##
+
+<br>
+
+* `next` is the function that `forward the request`   
+
+* Usually . `interceptor` acts `before the requst is sent` . So , we should call `next` to continue the `request` process while using inteceptors .
+
+* next is the type `Httphandler` that should be imported form 'http/common' .
+
+<br>
+
+* The intercept() should `return` should be in the following format .
+
+<br>
+
+```javascript
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
+import { Observable } from "rxjs";
+
+export class AuthInterceptorService implements HttpInterceptor {
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        //...logic to authenticate or something we want
+        console.log(" Request is on it's waay ! ");
+        return next.handle(req);       //return
+    }
+}
+```
+
+<br>
+
+## intercept() return : ##
+
+<br>
+
+```javascript
+...
+ return next.handle(req);       //return
+...
+```
+* As we know , `next` is responsible for handling the request to move it to further . We should call this function with `handle` ny provide the `req` as argument .
+
+* So that , our request will go in it's flow .
+
+<br>
+
+## Add the interceptor in providers array in app.module.ts ##
+
+<br>
+
+* As we know , interceptors are also belongs to services . So we should add it in providers array in app.module.ts file .
+
+* But , `interceptor` will use the special way that is `javascript Object` which return three key , vaue pair .
+
+<br>
+
+### app.module.ts file ###
+
+```javascript
+...
+  providers: [
+    {
+      
+    }
+  ],
+...
+```
+
+<br>
+
+## provide key ##
+
+```javascript
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+...
+  providers: [
+    {
+      provide : HTTP_INTERCEPTORS,
+    }
+  ]
+```
+
+<br>
+
+* The `provide` key will contain the value as  `HTTP_INTERCEPTORS` which is imported frm '@angular/common/http'
+
+* This acts as the token to identify the classes attached to the interceptors whenever the requst need to analyses before leaving using the interceptors .
+
+<br>
+
+## useclass key ##
+
+<br>
+
+```javascript
+...
+import { AuthInterceptorService } from './auth-interceptor.service';
+...
+  providers: [
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+    }
+  ],
+...
+```
+
+<br>
+
+* The `useClass` key will contain the value of the file that is having the `class` which has the interceptor interface and that is also need to be imported from the file location .
+
+
+<br>
+
+## multi key ##
+
+<br>
+
+```javascript
+...
+  providers: [
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi : true
+    }
+  ],
+...
+```
+<br>
+
+* The `multi` key need to be have `true` value for using more than one interceptor files .
+
+<br>
+
+# Manupulating request Objects with clone #
+
+<br>
+
+* Inside the interceptor we can also modify the requst data . But , we can not modify by assiging the new value to it .
+
+* To modify the request like url , header , body and etc  , we shold clone the request and pass an object as an argument to modify the feature that we want .
+
+* Here , i have added the new header in the request .
+
+<br>
+
+```javascript
+...
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        const modifiedRequest  = req.clone( 
+            { headers : req.headers.append( 'abc' , 'vijayHeader') }   // Appending the new header with old header
+             )
+        return next.handle(modifiedRequest);               // return the modified req to get correct result .
+    }
+...
+```
+<br>
+
+* Return the `modifiedrequest` .
+
+<br>
+
+### Result : ###
+
+<br>
+
+<img src="images/http-52.png">
+
+<br>
+
+* We can get the modified headers for all the request like `get` , `store` .. 
+
+<br>
+
+# Response Inteceptors #
+
+<br>
+
+* We can also access the `response` in the inteceptors . We should do this in `handle` method . This is similar to the thing we modify the request before subscribing to it using pipe() .
+
+* Here , i just want printed the response using tap method . But , we can make changes according to it .
+
+<br>
+
+```javascript
+...
+import { tap } from 'rxjs/operators'
+...
+export class AuthInterceptorService implements HttpInterceptor {
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        console.log(req.url);
+        
+        const modifiedRequest  = req.clone( 
+            { headers : req.headers.append( 'abc' , 'vijayHeader') }   // Appending the new header with old header
+             )
+        return next.handle(modifiedRequest).pipe(
+            tap( (event) => {
+                console.log(event);
+              if(event.type === HttpEventType.Response){
+                console.log("Response arrived , body data : ");
+                console.log(event.body);
+                
+              }
+                
+            } )
+...
+```
+
+<br>
+
+# Multiple Interceptors #
+
+<br>
+
+* if we have multiple interceptors , the the `order` is very important while we declare them in `providers` array in `app.module.ts` file .
+
+* The fisrt will execute first .
+
+<br>
+
+```javascript
+...
+  providers: [
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: AuthInterceptorService,
+      multi : true
+    },
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass: LoggingInterceptorServices,
+      multi : true
+    }
+  ],
+...
+```
+<br>
+
+# Authentication and Route Protection #
+
+<br>
+
+
+
+
+
+
+
+
 
 
 

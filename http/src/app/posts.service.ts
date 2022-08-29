@@ -75,15 +75,20 @@ export class PostsService{
      return this.http.delete < { [key:string] : Post } > (
         'https://http-request-learning-40dca-default-rtdb.europe-west1.firebasedatabase.app/posts.json',
         {
-            observe : 'events'           // Using 'events'
+            observe : 'events'  ,         // Using 'events'
+            responseType : 'json'
         }
       ).pipe(
         tap( 
             event => {
-                // if(event.type === HttpEventType){
-                    
-                // }
-                console.log(event);            // Displaying the response data events in console 
+              if(event.type === HttpEventType.Sent){
+                // console.log(event.type);
+                // .. we can see the response data status 
+              }
+                if(event.type === HttpEventType.Response){
+                  // console.log(event.body);
+                }
+                           
         } )
       )
       
