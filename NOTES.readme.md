@@ -7479,6 +7479,1420 @@ export class AuthInterceptorService implements HttpInterceptor {
 
 <br>
 
+* Authentication is responsible to allow the permitted used to access the entire application or visit some pages within the application .
+
+<br>
+
+# Working of Authentication #
+
+<br>
+
+* We have client ( The broeser , The user using the browser ) and server ( Stores and retrives data ) .
+
+* When authentication process accurs that means when the user provide their credentials ( email , number , or any id ) to in the application , the credentials are validated in the server .
+
+* The validation should not be done in the browser as the client can simply see and modify he credentials which is not secure . So , it is happening in the server which the user cannot access .
+
+* As our angular application is single page application transformation between different pages is handled by router . The server is the API . 
+
+* So the frontend and backend are decoupled . So the server does not know the client ( Browser ) directly .
+
+* So the server validates the credentials that the user enters , and return back the `tokens` .
+
+* Tokens are the `json web tokens` that contain the meta data . As the json string is encoded , the browser does not know what it is . It can be only validated by the server itself .
+
+* The client stores the token in the in it's local storage and the stored token is sent to the server when the autherisation is successful for particular request .
+
+<br>
+
+<img src="images/auth-1.png">
+
+<br>
+
+# Switching between Auth Modes #
+
+<br>
+
+* We are using the single form as `login form` and `signup` form . So , we should change the UI dynamivally by clicking a button .
+
+<br>
+
+```javascript
+...
+     <button 
+        class="btn btn-primary"  
+        type="submit"> {{ isLoginMode ? 'Login' : 'Sign Up' }}
+      </button> |
+
+        <button class="btn btn-primary" 
+        type="button" 
+        (click)="onSwitchMode()"
+        > Switch to {{ isLoginMode ? 'Sign Up' : 'Log in '}}
+       </button>
+...  
+```
+
+<br>
+
+```javascript
+...
+  isLoginMode = true ;
+
+  onSwitchMode(){
+    this.isLoginMode = ! this.isLoginMode ;
+  }
+...
+```
+<br>
+
+# Setting up firebase for Authentication  #
+
+<br>
+
+* As we practise with the firebase , we can set up the firebase with Authentication setup . Other API's will provided tokens for Authentication for users . 
+
+<br>
+
+### Step : 1 Change the read and write access to `auth!=null` in database section  ###
+
+<br>
+
+<img src="images/auth-3.png">
+
+<br>
+
+### Step : 2 Go to Authentication section in firebase ###
+
+<br>
+
+<img src="images/auth-2.png">
+
+<br>
+
+### Step : 3 Click the get started button ###
+
+<br>
+
+<img src="images/auth-4.png">
+
+<br>
+
+### Step : 4 choose email and password option for our usecase ###
+
+<br>
+
+<img src="images/auth-5.png">
+
+<br>
+
+### Step : 5 Enable the and save the option  ###
+
+<br>
+
+<img src="images/auth-6.png">
+
+<br>
+
+### Step : 6 After enabled:   ###
+
+<br>
+
+<img src="images/auth-7.png">
+
+<br>
+
+### Step : 7 Verify the users section to see the Authenticated users ###
+
+<br>
+
+<img src="images/auth-8.png">
+
+<br>
+
+# Preparing for signUp Request #
+
+<br>
+
+* As we use firebase as our rest API , It provides the `url` for our authentication and other `request` and `response` structure and data in their documentation for various actions like sing in and sign up . 
+
+* I provded the link of our projects firebase .
+
+<br>
+
+<a href="https://firebase.google.com/docs/reference/rest/auth"> CLICK ME TO VISIT FIREBASE AUTH REST API  </a>
+
+<br>
+
+* This page contains the URL and request and response payloads . We can navigate between various methods by changing the methods in the side bar .
+
+<br>
+
+<img src="images/auth-9.png">
+
+<br>
+
+* To use the url for our our endpoint , we must copy the url in this section and change the `[API]=key` with our web key provided by the firebase when we use it while send a request . 
+
+<br>
+
+# Create a method for sign up in sepearte serveice #
+
+<br>
+
+* Proceed the common method for post request as usual .
+
+* AS we already discussed , provide the link we found in the rest api sign up module . and replace the `[APIKEY]` part in the url with the web api key that provided by firebase .
+
+<br>
+
+```javascript
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+
+@Injectable( {providedIn : 'root'} ) 
+export class AuthSrvice {
+
+    constructor( private http : HttpClient){}
+
+    signUp(){
+         this.http.post( 
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]',     // Change with web pai key in  `[API_KEY]`
+         )
+         
+    }
+
+}
+```
+
+<br>
+
+
+## To find web Api in firebase ##
+
+<br>
+
+* Click the project overview section `settings icon` and go to `project setting` .
+
+<br>
+
+<img src="images/auth-10.png">
+
+<br>
+
+<img src="images/auth-11.png">
+
+<br>
+
+* Use the highlighted link insted the`[APIKEY]` in the url .
+
+<img src="images/auth-12.png">
+
+<br>
+
+```javascript
+...
+'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+...
+```
+
+<br>
+
+* The `post` requst needed to be attached with some other properties in an objet format . We can get the request data in the documentation that we have get the url .
+
+<br>
+
+<img src="images/auth-13.png">
+
+<br>
+
+* We can also define the response data that provided in the same link as below : 
+
+<br>
+
+<img src="imaes/auth-14.png">
+
+<br>
+
+* So , we have created the sign up method :
+
+### auth.service.ts ###
+
+<br>
+
+```javascript
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+
+
+interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string
+}
+
+@Injectable( {providedIn : 'root'} ) 
+export class AuthSrvice {
+
+    constructor( private http : HttpClient){}
+
+    signUp(email : string , password : string){
+
+       return this.http.post<AuthResponseData>( 
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+         )
+         
+    }
+
+}
+```
+
+<br>
+
+# Sending the signup request #
+
+<br>
+
+* Here we have done wih usual subscribing and just printed the response data and error message i so .
+
+<br>
+
+```javascript
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { AuthService } from './auth.service';
+
+@Component({
+  selector: 'app-auth',
+  templateUrl: './auth.component.html'
+})
+export class AuthComponent {
+
+  constructor(private auth : AuthService){}
+
+
+  isLoggingMode = true ;
+
+  onSwitchMode(){
+   this.isLoggingMode = ! this.isLoggingMode ;
+  } 
+
+  onSubmit(form : NgForm){
+    if(!form.valid){
+      return;
+    }
+    const email = form.value.email;
+    const password = form.value.password;
+
+    if(this.isLoggingMode){
+      //...                       // Login MOde  
+    }
+    else{
+      this.auth.signUp(email,password).subscribe(            // Sign Up mode 
+        resData => {
+          console.log(resData);
+          },
+          error => {
+            console.log(error);
+            
+          }
+      );
+    }
+
+
+   form.reset();
+  }
+} 
+
+```
+<br>
+
+* The result :
+
+<br>
+
+<img src="images/auth-15.png">
+
+<br>
+
+* The addes user in firebase users : 
+
+<br>
+
+<img src="images/auth-16.png">
+
+<br>
+
+* If the same user tries to sign Up , error will occur : 
+
+<br>
+
+<img src="images/auth-17.png">
+
+<br>
+
+# Adding loading spinners #
+
+<br>
+
+* Use the loadingspinners.io for our project forms to display the loading icon when the form loads .
+
+* Visit the following link to use the css loading spinners in our project .
+
+<br>
+
+<a href= "https://loading.io/css/">  Click me to visit loading spinners ! </a>
+
+<br>
+
+<img src="images/auth-18.png">
+
+<br>
+
+* Choose any one spinner , they provide the html and css for the each spinner . 
+
+<br>
+
+<img src="images/auth-19.png">
+
+<br>
+
+* Use the code in our application as a seperate component and add to the declaration section and use the component in the auth section ts and template .
+
+<br>
+
+
+# Error handling  #
+
+* We should see the error fields in the console , then we can use the error message from that by subscribing to it .
+
+* We can find the common error codes in the documentation itself .
+
+<br>
+
+<img src="images/auth-20.png">
+
+<br>
+
+* We can get access to the message :
+
+<br>
+
+<img src="images/auth-21.png">
+
+<br>
+
+
+### Service with catch error and throw error : ###
+
+<br>
+
+```javascript
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { catchError, throwError } from "rxjs";
+
+
+interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string
+}
+
+@Injectable( {providedIn : 'root'} ) 
+export class AuthService {
+
+    constructor( private http : HttpClient){}
+
+    signUp(email : string , password : string){
+
+       return this.http.post<AuthResponseData>( 
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+         ).pipe(
+            catchError( errorRes => {
+                console.log(errorRes);
+                let errorMessage = " An unknown error occured ! "
+
+                if( !errorRes.error || !errorRes.error.error){
+                    return throwError(errorMessage)
+                }
+                switch(errorRes.error.error.message){
+                    case 'EMAIL_EXISTS' :
+                    errorMessage = ' The email already exists ! '
+                  }
+                  return throwError(errorMessage)
+            })
+                
+            
+         )
+         
+    }
+
+}
+```
+
+<br>
+
+### ts file to handle the subscription : ###
+
+<br>
+
+```javascript
+...
+    else{
+      this.auth.signUp(email,password).subscribe(            // Sign Up mode 
+        resData => {
+          this.isLoading = false;
+          console.log(resData);
+          },
+          errorMessage => {
+          this.isLoading = false;
+          console.log(errorMessage);
+          this.error = errorMessage;
+        }
+      );
+    }
+...
+```
+
+<br>
+
+# Login method #
+
+<br>
+
+* Login is as similar as sigup but just we want to change response data .
+
+<br>
+
+```javascript
+...
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+...
+    login(email : string , password : string ){
+       return this.http.post<AuthResponseData>(
+            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+        );
+    }
+...
+```
+
+<br>
+
+* We can combine the subscription wihh observable .
+
+<br>
+
+```javascript
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { AuthResponseData, AuthService } from './auth.service';
+
+@Component({
+  selector: 'app-auth',
+  templateUrl: './auth.component.html'
+})
+export class AuthComponent {
+
+  constructor(private auth : AuthService){}
+
+
+  isLoggingMode = true ;
+  isLoading = false ;
+  error  = '';
+  
+  
+
+  onSwitchMode(){
+   this.isLoggingMode = ! this.isLoggingMode ;
+  } 
+
+  onSubmit(form : NgForm){
+    if(!form.valid){
+      return;
+    }
+    const email = form.value.email;
+    const password = form.value.password;
+    this.isLoading = true ;
+
+    let authObs : Observable<AuthResponseData>
+
+    if(this.isLoggingMode){
+      authObs = this.auth.login(email,password);
+    }
+    else{
+      authObs = this.auth.signUp(email,password)
+    }
+
+    authObs.subscribe(            
+    resData => {
+      this.isLoading = false;
+      console.log(resData);
+      },
+      errorMessage => {
+      this.isLoading = false;
+      console.log(errorMessage);
+      this.error = errorMessage;
+    }
+  );
+
+
+   form.reset();
+  }
+} 
+
+```
+
+<br>
+
+* Result : 
+
+<br>
+
+<img src="images/auth-22.png">
+
+<br>
+
+# Error handling in login #
+
+<br>
+
+* We can handle log in and sign up errors in single function  .
+
+<br>
+
+```javascript
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { catchError, throwError } from "rxjs";
+
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+
+@Injectable( {providedIn : 'root'} ) 
+export class AuthService {
+
+    constructor( private http : HttpClient){}
+
+    signUp(email : string , password : string){
+
+       return this.http.post<AuthResponseData>( 
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+         ).pipe(catchError( this.errorHandler) )
+         
+    }
+
+
+    login(email : string , password : string ){
+       return this.http.post<AuthResponseData>(
+            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+            ).pipe(catchError( this.errorHandler) )
+
+    }
+
+    private errorHandler(errorRes : HttpErrorResponse){
+            console.log(errorRes);
+            let errorMessage = " An unknown error occured ! "
+            if( !errorRes.error || !errorRes.error.error){
+                return throwError(errorMessage)
+            }
+            switch(errorRes.error.error.message){
+
+                case 'EMAIL_EXISTS' :
+                errorMessage = ' The email already exists ! '
+                break;
+
+                case 'EMAIL_NOT_FOUND' :
+                errorMessage = ' The email does not exists ! '
+                break;
+
+                case 'INVALID_PASSWORD' :
+                errorMessage = ' The Paaword is wrong ! '
+                break;
+
+                
+              }
+              return throwError(errorMessage)
+        }
+
+}
+```
+
+<br>
+
+# Creating and storing user data #
+
+<br>
+
+* Store the data of a user wheather user is authenticated by adding user.model.ts .
+
+* After creating the model , store the authentication user in service using subject .
+
+* We should use our subject that emits an event when we log in and sign up without any error .
+
+* This should store the user values in the model . After that we can use it according to our need .
+
+<br>
+
+### user.model.ts ###
+
+```javascript
+export class User {
+    constructor(
+        public email : string,
+        public id : string ,
+        private _token : string ,              // TO make developr use the token with getter .
+        private _tokenExpirationDate : Date 
+    ){}
+
+
+    get token(){
+        if( !this._tokenExpirationDate || new Date() > this._tokenExpirationDate ){
+            return null ;
+        }
+       return this._token
+    }
+}
+```
+
+<br>
+
+### auth-service.ts ###
+
+<br>
+
+```javascript
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { catchError, Subject, throwError } from "rxjs";
+import { tap } from "rxjs/operators"
+import { User } from "./user.model";
+
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+
+@Injectable( {providedIn : 'root'} ) 
+export class AuthService {
+
+    constructor( private http : HttpClient){}
+
+    user = new Subject<User>();         // Storing the authentication data using pipe .
+
+
+    signUp(email : string , password : string){
+
+       return this.http.post<AuthResponseData>( 
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+         ).pipe( 
+            catchError( this.errorHandler),
+            tap( resData => {
+                this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn)
+            })
+             )
+         
+    }
+
+
+    login(email : string , password : string ){
+       return this.http.post<AuthResponseData>(
+            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+            {
+                email : email,
+                password : password,
+                returnSecureToken : true
+            }
+            ).pipe( 
+                catchError( this.errorHandler) ,
+                tap (resData => {
+                    this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn );
+                } ) 
+
+                
+                )
+
+    }
+
+    private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
+        const expirationdate = new Date( new Date().getTime() + expiresIn * 1000);
+        const user = new User(email , userId , token , expirationdate)  // Pass the values to the uder model
+        this.user.next(user);       // emit the subject with user 
+    }
+
+    private errorHandler(errorRes : HttpErrorResponse){
+            console.log(errorRes);
+            let errorMessage = " An unknown error occured ! "
+            if( !errorRes.error || !errorRes.error.error){
+                return throwError(errorMessage)
+            }
+            switch(errorRes.error.error.message){
+
+                case 'EMAIL_EXISTS' :
+                errorMessage = ' The email already exists ! '
+                break;
+
+                case 'EMAIL_NOT_FOUND' :
+                errorMessage = ' The email does not exists ! '
+                break;
+
+                case 'INVALID_PASSWORD' :
+                errorMessage = ' The Paaword is wrong ! '
+                break;
+
+
+              }
+              return throwError(errorMessage)
+        }
+
+}
+```
+
+<br>
+
+# Reflecting the Auth state in UI #
+
+<br>
+
+# navigating to some page after login successfully using the router #
+
+<br>
+
+* We can do it as usual navigation with router in the auth component . But we should use the navigation in exact place where the login , sign up gets successful .
+
+<br>
+
+```javascript
+...
+
+  constructor(
+    private auth : AuthService ,
+    private route : Router
+    ){}
+
+
+ ...
+   
+    authObs.subscribe(            
+    resData => {
+      this.isLoading = false;
+      console.log(resData);
+       this.route.navigate(['recipes'])  // Navigate to some page after login or  sign up
+      },
+...)
+...
+} 
+
+```
+
+<br>
+
+# Providing access to only particular pages in headers #
+
+<br>
+
+* We have already set up a user in auth.service . So we want to just use the user in the in our main component where we need to display the pages ( Our example headers component )
+
+* Get the user from the serveice and subscribe to it and unsubscribe to it .
+
+* Additionally set the the variable to to change the values between true and false while subscribibg to the user .
+
+* Then use the variable in the template to display the particular pages .
+
+### header.component.ts ###
+
+```javascript
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
+
+import { DataStorageService } from '../shared/data-storage.service';
+
+@Component({
+  selector: 'app-header',
+  templateUrl: './header.component.html'
+})
+export class HeaderComponent implements OnInit , OnDestroy{
+
+  userSubscription!: Subscription;
+  isAuthenticated = false ;
+
+  constructor(
+    private dataStorageService: DataStorageService ,
+    private auth : AuthService,
+    ) {}
+
+    ngOnInit(): void {
+      this.userSubscription = this.auth.user.subscribe(
+        user => {
+          this.isAuthenticated = !!user ;
+          console.log(!user);
+          console.log(!!user);
+          }
+      );
+    }
+
+  onSaveData() {
+    this.dataStorageService.storeRecipes();
+  }
+
+  onFetchData() {
+    this.dataStorageService.fetchRecipes().subscribe();
+  }
+
+  ngOnDestroy(): void {
+     this.userSubscription.unsubscribe();
+  }
+}
+
+```
+
+<br>
+
+### header.component.html ###
+
+<br>
+
+```javascript
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a routerLink="/" class="navbar-brand">Recipe Book</a>
+    </div>
+
+      <ul class="nav navbar-nav">
+
+        <li routerLinkActive="active" *ngIf="isAuthenticated">
+          <a routerLink="/recipes">Recipes</a>
+        </li>
+
+        <li routerLinkActive="active" *ngIf="!isAuthenticated">
+          <a routerLink="/auth">Authenticate</a>
+        </li>
+
+         <li routerLinkActive="active">
+          <a routerLink="/shopping-list">Shopping List</a>
+        </li>
+
+       
+
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right">
+
+      <li *ngIf="isAuthenticated">
+        <a style="cursor:pointer;" href="">Log out </a>
+      </li>
+
+          <div ngbDropdown  *ngIf="isAuthenticated">
+         
+          <button class="btn btn-warning" id="gfg" 
+          ngbDropdownToggle>Manage</button>
+
+            <div ngbDropdownMenu="gfg">
+            <li>
+              <a  ngbDropdownItem style="cursor: pointer;" (click)="onSaveData()">Save Data</a>
+            </li>
+            <li>
+              <a  ngbDropdownItem style="cursor: pointer;" (click)="onFetchData()">Fetch Data</a>
+            </li>
+          </div>
+          </div>
+      </ul>
+    </div>
+</nav>
+
+```
+<br>
+
+# Adding the token to outgoing request #
+
+<br>
+
+* Till now , we cannot recive the data in the firebase even we are Authenticated because we didnot send any token to the firebase that i am the authenticated person .
+
+* To do this , we must send our user token while fetching the data from the API or server .
+
+* I our application , we fetching and storing our data in the save data and fetch data in manage dropdown . The methods are located in the datastorage.servive.ts file as below :
+
+<br>
+
+### data-storage.service.ts file before sending token to the firebase ###
+
+<br>
+
+```javascript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, tap } from 'rxjs/operators';
+
+import { Recipe } from '../recipes/recipe.model';
+import { RecipeService } from '../recipes/recipe.service';
+
+@Injectable({ providedIn: 'root' })
+export class DataStorageService {
+  constructor(private http: HttpClient, private recipeService: RecipeService) {}
+
+  storeRecipes() {
+    const recipes = this.recipeService.getRecipes();
+    this.http
+      .put(
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
+        recipes
+      )
+      .subscribe(response => {
+        console.log(response);
+      });
+  }
+
+  fetchRecipes() {
+    return this.http
+      .get<Recipe[]>(
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json'
+      )
+      .pipe(
+        map(recipes => {
+          return recipes.map(recipe => {
+            return {
+              ...recipe,
+              ingredients: recipe.ingredients ? recipe.ingredients : []
+            };
+          });
+        }),
+        tap(recipes => {
+          this.recipeService.setRecipes(recipes);
+        })
+      )
+  }
+}
+
+```
+
+<br>
+
+* So to do this , we just want get access the user from Auth.service.ts file .
+
+* We just want the active user authentication details and do not need the ongoing subscriptions .
+
+* To get the immeadiate access for the token in the user service , change the `subject` to `Behavioursubject` in auth.servive.ts .
+
+<br>
+
+```javascript
+import { BehaviorSubject, catchError, Subject, throwError } from "rxjs";
+...
+user = new BehaviorSubject<User | null> (null);         // use the BEhaviourSubject with initial value null
+...
+```
+<br>
+
+* Then use user and subscribe to it in the fetch method in the data-storage.service.ts .
+
+* To get only the last subscription , use `take` method inside pipe before subscribing to it .
+
+* `take()` operator takes a number as an argument imported form rxjs/operators .
+
+* We have given 1 as an argument as we want only one value from that observable that is last subscription .
+
+* USe the `exhaustMap` observable to use the two observable in pipe . The `exhaustmap` will wait for the first one to complete the replace the second observable with the previous one .
+
+* After that change the all methods like map ,tap after the exhaustmap observable .
+
+* So we got the access to the user and token .
+
+* Pass the user token in the request as an object with `HttpParams` .
+
+ * params : new HttpParams().set('auth', user.token)
+
+ <br>
+
+ ```javascript
+ import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { exhaustMap, map, take, tap } from 'rxjs/operators';
+
+import { Recipe } from '../recipes/recipe.model';
+import { RecipeService } from '../recipes/recipe.service';
+import { AuthService } from '../auth/auth.service';
+
+@Injectable({ providedIn: 'root' })
+export class DataStorageService {
+  constructor(
+    private http: HttpClient, 
+    private recipeService: RecipeService,
+    private authService : AuthService
+    ) {}
+
+  storeRecipes() {
+    const recipes = this.recipeService.getRecipes();
+    this.http
+      .put(
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
+        recipes
+      )
+      .subscribe(response => {
+        console.log(response);
+      });
+  }
+
+  fetchRecipes() {
+    console.log("hi");
+    
+   return  this.authService.user.pipe (
+       take(1) ,
+        exhaustMap(
+     ( user :any) => {
+      console.log(user.token);
+      
+        return this.http
+              .get<Recipe[]>(
+                'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
+                {
+                  params : new HttpParams().set('auth', user.token)
+                }
+              );
+      }
+    ) ,
+    map(recipes => {
+      return recipes.map(recipe => {
+        return {
+          ...recipe,
+          ingredients: recipe.ingredients ? recipe.ingredients : []
+        };
+      }); 
+    }),
+    tap(recipes => {
+      this.recipeService.setRecipes(recipes);
+    }) ) .subscribe()
+
+  }
+}
+
+ ```
+
+ <br>
+
+# Attaching the token with interceptor #
+
+<br>
+
+* We can also do the same thing for save data as we did for fetch data .
+
+* But , with the help of HttpClient , we can also do it in another interceptor method .
+
+* So add the interceptor service for Auth .
+
+* Provide the AuthInterceptor service for in app.module.ts file .
+
+<br>
+
+### auth-interceptor.service.ts ###
+
+<br>
+
+```javascript
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpParams, HttpRequest } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { AuthService } from "./auth.service";
+import { take , exhaustMap } from 'rxjs/operators'
+
+@Injectable()
+export class AuthInterceptorService implements HttpInterceptor {
+
+constructor(private authService : AuthService){}
+
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+
+        this.authService.user.pipe (
+            take(1) ,
+             exhaustMap(
+          ( user:any) => {
+            if(!user){
+                return next.handle(req)
+            }
+            const modifiedReq = req.clone({
+                params : new HttpParams().set('auth' ,user.token)
+            });
+            return next.handle(modifiedReq)
+            }) )
+
+        return next.handle(req);
+    }
+
+}
+
+
+
+```
+<br>
+
+### data-storage.service.ts ###
+
+<br>
+
+```javascript
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { exhaustMap, map, take, tap } from 'rxjs/operators';
+
+import { Recipe } from '../recipes/recipe.model';
+import { RecipeService } from '../recipes/recipe.service';
+import { AuthService } from '../auth/auth.service';
+
+@Injectable({ providedIn: 'root' })
+export class DataStorageService {
+  constructor(
+    private http: HttpClient, 
+    private recipeService: RecipeService,
+    private authService : AuthService
+    ) {}
+
+  storeRecipes() {
+    const recipes = this.recipeService.getRecipes();
+    this.http
+      .put(
+        'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
+        recipes
+      )
+      .subscribe(response => {
+        console.log(response);
+      });
+  }
+
+  fetchRecipes() {
+    return this.http.get<Recipe[]>(
+    'https://ng-course-recipe-book-65f10.firebaseio.com/recipes.json',
+    ).pipe ( 
+      map(recipes => {
+      return recipes.map(recipe => {
+        return {
+          ...recipe,
+          ingredients: recipe.ingredients ? recipe.ingredients : []
+        };
+      }); 
+    }),
+    tap(recipes => {
+      this.recipeService.setRecipes(recipes);
+    }) 
+    )
+   .subscribe()
+
+  }
+}
+
+```
+
+<br>
+
+# Adding Logout #
+
+<br>
+
+* As we used the LogIn method by Subject , while LogOut , we just need to set to null and redirect again to authentication page .
+
+<br>
+
+### auth.service.ts ###
+
+<br>
+
+```javascript
+...
+user = new BehaviorSubject<User | null >(null);         // use the BEhaviourSubject with initial value null
+...
+   logOut(){
+        this.user.next(null);
+        this.route.navigate(['/auth']);
+    }
+...    
+```
+
+<br>
+
+### Call this method in which service you want ( For our application we use the Header component )###
+
+<br>
+
+* .html :
+
+```javascript
+...
+  <li *ngIf="isAuthenticated">
+        <a style="cursor:pointer;" href="" (click)="onLogOut()" >Log out </a>
+      </li>
+...
+```
+<br>
+
+* .ts :
+
+```javascript
+...
+  onLogOut(){
+    this.auth.logOut();
+  }
+...
+```
+
+<br>
+
+# Adding auto LogIn #
+
+<br>
+
+* To keep the user with logIn always , we must store those value to local storage while we creating the user with token .
+
+
+<br>
+
+### auth.service.ts  ###
+
+```javascript
+...
+    private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
+       ...
+        localStorage.setItem( 'userData' , JSON.stringify(user) )        // Store the user in local storage to implement auto-login
+    }
+...
+```
+
+<br>
+
+* We can see it when we log-in in the DevTools > Application > Storage > Local Storage > ... ( data )
+
+
+<img src="images/auth-23.png">
+
+<br>
+
+* Add an Auto-LogIn method in the service file to utilize the Local Storage and implement the method .
+
+<br>
+
+```javascript
+...
+    private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
+       ...
+        localStorage.setItem( 'userData' , JSON.stringify(user) )        // Store the user in local storage to implement auto-login
+    }
+...
+
+    autoLogin(){
+
+        const  userData : {
+            email : string ,
+            id : string ,
+            _token : string ,
+            _tokenExpirationData : string 
+        } 
+         = JSON.parse(localStorage.getItem('userData'));
+
+        if(!userData){
+            return ;
+        }   
+     
+
+        const loadedUser = new User(userData.email , userData.id , userData._token , new Date(userData._tokenExpirationData))
+
+        if(loadedUser.token){
+            this.user.next(loadedUser)
+        }
+    }
+...
+```
+
+<br>
+
+
+* Call the Auto-LogIn method when the app gets loaded .
+
+<br>
+
+```javascript
+...
+  ngOnInit(): void {
+   this.auth.autoLogin();
+  }
+...
+```
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
