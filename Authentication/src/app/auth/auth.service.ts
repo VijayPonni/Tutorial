@@ -26,7 +26,7 @@ export class AuthService {
     // user = new Subject<User>();
 
     user = new BehaviorSubject<User | null >(null);         // use the BEhaviourSubject with initial value null
-
+    private tokenexpirationTimer : any ;
 
     signUp(email : string , password : string){
 
@@ -68,38 +68,53 @@ export class AuthService {
 
     logOut(){
         this.user.next(null);
-        // this.route.navigate(['/auth']);
+        this.route.navigate(['/auth']);
+        localStorage.removeItem('userData');   // Clear local Storage 
+
+        if(this.tokenexpirationTimer){
+            clearTimeout(this.tokenexpirationTimer);
+        }
+        this.tokenexpirationTimer = null ;
+    }
+    
+    autoLogout(expirationDuration: number){
+      this.tokenexpirationTimer =  setTimeout( () => {        
+        this.logOut();
+      } , expirationDuration) 
     }
 
     private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
         const expirationdate = new Date( new Date().getTime() + expiresIn * 1000);
         const user = new User(email , userId , token , expirationdate)  // Pass the values to the uder model
         this.user.next(user);       // emit the subject with user 
+        this.autoLogout ( expiresIn * 1000);          // call Autologout with the expires time 
         localStorage.setItem( 'userData' , JSON.stringify(user)  )          // Store the user in local storage to implement auto-login
     }
 
-    autoLogin(){
+    // autoLogin(){
+    //     console.log("Auto LogIn");
+    //      const  userData : {
+    //         email : string ,
+    //         id : string ,
+    //         _token : string ,
+    //         _tokenExpirationData : string 
+    //     } 
+    //      = JSON.parse(localStorage.getItem('userData'));
 
-        const  userData : {
-            email : string ,
-            id : string ,
-            _token : string ,
-            _tokenExpirationData : string 
-        } 
-         = JSON.parse(localStorage.getItem('userData'));
-
-        if(!userData){
-            return ;
-        }   
+    //     if(!userData){
+    //         return ;
+    //     }   
      
+    //     const loadedUser = new User(userData.email , userData.id , userData._token , new Date(userData._tokenExpirationData))
 
-        const loadedUser = new User(userData.email , userData.id , userData._token , new Date(userData._tokenExpirationData))
-
-        if(loadedUser.token){
-            this.user.next(loadedUser)
-        }
-    }
-
+    //     if(loadedUser.token){
+    //         this.user.next(loadedUser);
+    //         const expirationDuration = new Date(userData._tokenExpirationData).getTime() -
+    //         new Date().getTime();
+    //         this.autoLogout(expirationDuration);
+    //     }
+    // }
+    
     private errorHandler(errorRes : HttpErrorResponse){
             console.log(errorRes);
             let errorMessage = " An unknown error occured ! "

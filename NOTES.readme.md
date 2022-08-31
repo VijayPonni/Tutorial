@@ -8872,10 +8872,1235 @@ user = new BehaviorSubject<User | null >(null);         // use the BEhaviourSubj
 ```
 <br>
 
+# Adding Auto LogOut #
+
+<br>
+
+* Need to clear everything that the user data when logsOut includes the localStorage .
+<br>
+
+### auth-service.ts ###
+
+```javascript
+...
+
+    logOut(){
+        this.user.next(null);
+        this.route.navigate(['/auth']);
+        localStorage.removeItem('userData');   // Clear local Storage 
+    }
+...
+```
+
+<br>
+
+* Set an Auto-LogOut method that clears the user data after certain peiod of time .
+
+<br>
+
+```javascript
+...
+
+    logOut(){
+        this.user.next(null);
+        this.route.navigate(['/auth']);
+        localStorage.removeItem('userData');   // Clear local Storage 
+    }
+    
+    autoLogout(expirationDuration: number){
+      setTimeout( () => {
+        this.logOut();
+      } , expirationDuration) 
+    }
+...
+```
+
+<br>
+
+* So we should not call the logout method again when the user mannually logging out . To avoid this , we should rectify the timing 
+
+<br>
+
+```javascript
+...
+private tokenexpirationTimer : any ;
+...
+    logOut(){
+        this.user.next(null);
+        this.route.navigate(['/auth']);
+        localStorage.removeItem('userData');   // Clear local Storage 
+
+        if(this.tokenexpirationTimer){
+            clearTimeout(this.tokenexpirationTimer);
+        }
+        this.tokenexpirationTimer = null ;
+    }
+    
+    autoLogout(expirationDuration: number){
+      this.tokenexpirationTimer =  setTimeout( () => {        
+        this.logOut();
+      } , expirationDuration) 
+    }
+...
+```
+
+<br>
+
+* Call the auto-logout method where we created the user :
+
+<br>
+
+```javascript
+    private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
+        ...
+        this.autoLogout ( expiresIn * 1000);          // call Autologout with the expires time 
+        ...
+    }
+```
+
+<br>
+
+* also add the logout with different time inside the auto-logout :
+
+<br>
+
+```javascript
+...
+autoLogin(){
+...
+if(loadedUser.token){
+...
+const expirationDuration = new Date(userData._tokenExpirationData).getTime() -
+new Date().getTime();
+ this.autoLogout(expirationDuration);
+}
+}
+...
+```
+<br>
+
+# Adding an Auth-Guard #
+
+<br>
+
+* We can add Auth-guard as we usually do in Routing with seperate service file .
+
+* We can add several new features into it to enhanve our guard .
+
+### auth-guard.ts ###
+
+<br>
+
+```javascript
+import { Injectable } from "@angular/core";
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from "@angular/router";
+import { map, Observable ,take } from "rxjs";
+import { tap } from 'rxjs/operators';
+import { AuthService } from "./auth.service";
+
+@Injectable({providedIn:'root'})
+export class AuthGauard implements CanActivate {
+
+    constructor(
+        private auth : AuthService ,
+        private route : Router
+        ){}
+
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): 
+    boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
+        return this.auth.user.pipe(
+            take(1),
+            map( user => { 
+                const isAuth =  !!user;
+                if(isAuth){
+                    return true;
+                }
+                return this.route.createUrlTree(['/auth'])
+             }),
+            // tap(isAuth => { 
+            //     if(!isAuth){
+            //         this.route.navigate(['/auth'])
+            //     }
+            // } )
+        )
+    }
+
+}
+```
+
+<br>
+
+* We should add the AuthGuard in the routing-module for which page we want make protection .
+
+<br>
+
+```javascript
+...
+ {
+    path: 'recipes',
+    component: RecipesComponent,
+    canActivate : [AuthGauard] ,
+...
+ }
+```
+
+<br>
+
+# Dynaic Components #
+
+<br>
+
+* Dynamic components are the components that are created in runtime .
+
+* For example , if we want to display an overlay or alert box for the whole page instantly , we will dynamic components .
+
+* This is not the angular feature but we can use this according to our need .
+
+<br>
+
+# Adding an Alert Modal Component #
+
+<br>
+
+* Let us create a seperate component and styling for the alert box if wrong login credentials .
+
+* Create a compnent as usuall .
+
+* Add it in the declarations in app.module.ts file .
+
+* use the components seletor as an element where we want to display the component .
+
+* In our example we want to display it in our Auth Component's warning message .
+
+<br>
+
+```javascript
+...
+    <!-- <div class="text text-danger" *ngIf=" error!=='' " >
+      <p>{{ error }}</p>
+    </div> -->
+
+    <AlertComponent [message] = "error" *ngIf="error"></AlertComponent>
+...
+```
+<br>
+
+* We can see the output as below :
+
+<br>
+
+<img src="images/dyn-com-1.png">
+
+<br>
+
+* But we cannot click the close button in that component .
+
+<br>
+
+# Understanding the diffeerent Components #
+
+<br>
+
+<img src="images/dyn-com-2.png">
+
+<br>
+
+# Using ngIf method #
+
+<br>
+
+* It is simple that we use earlier .
+
+<br>
+
+### alert.component.html ###
+
+<br>
+
+```javascript
+<div class="backdrop" (click)="onClose()"></div>
+<div class="alert-box">
+    <p> {{ message }} </p>
+    <div class="alert-box-actions">
+        <button class="btn btn-primary" (click)="onClose()"> Close </button>
+    </div>
+</div>
+```
+
+<br>
+
+### alert.component.ts ###
+
+<br>
+
+```javascript
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+
+@Component({
+    selector : 'AlertComponent',
+    templateUrl : './alert.component.html',
+    styleUrls : ['alert.component.css']
+})
+
+export class AlertComponent {
+  @Input() message!: string;
+  @Output() close = new EventEmitter<void>()
+
+  onClose(){
+  this.close.emit();
+  }
+}
+```
+
+<br>
+
+### Auth.component.html ###
+
+<br>
+
+```javascript
+...
+  <!-- <div class="text text-danger" *ngIf=" error!=='' " >
+      <p>{{ error }}</p>
+    </div> -->
+
+    <AlertComponent 
+    [message] = "error" 
+    *ngIf="error"
+    (close)="onHandleError()"
+    ></AlertComponent>
+...
+```
+
+<br>
+
+### Auth.component.ts ###
+
+<br>
+
+```javascript
+...
+  error :any = '';
+  ...
+  onHandleError(){
+    this.error=null;
+  }
+....
+```
+
+<br>
+
+# Preparing Programatic creation #
+
+<br>
+
+* Intead of using this ordinary method , we can do it programatically .
+
+* Create a method to implement it where we want to create the dynamic component .
+
+* In our example , we will create it in the auth-component bacause there only we need to call the alert component when the error occures .
+
+<br>
+
+```javascript
+...
+  authObs.subscribe(            
+...
+      errorMessage => {
+    ...
+      this.showErrorAlert(errorMessage);
+      ...
+    }
+  );
+private showErrorAlert(message:string){
+}
+...
+```
+
+<br>
+
+* Import the component which we want to use in this component . Here , we should call alert component .
+
+<br>
+
+```javascript
+...
+import { AlertComponent } from '../shared/alert/alert.component';
+...
+```
+<br>
+
+* Inject `componentFactoryresolver` from angular core .
+
+<br>
+
+```javascript
+...
+import { Component, ComponentFactoryResolver } from '@angular/core';
+import { AlertComponent } from '../shared/alert/alert.component';
+...
+  constructor(
+   ...
+    private componentFactoryResolver : ComponentFactoryResolver ,
+    ){}
+```
+
+<br>
+
+
+* Use the variable and call the `resolveComponentFactory(AlertComponent)` by passing our component as an argument which we want to create dynamically .
+
+* Store these in a specific variable .
+
+<br>
+
+```javascript
+  private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+ }
+```
+
+<br>
+
+* Create a helper directive with the injection of `ViewContainerRef` and make it publically available to access it from outside .
+
+### placeholder.directive.ts ###
+
+<br>
+
+```javascript
+import { Directive, ViewContainerRef } from "@angular/core";
+
+@Directive({
+    selector : '[appPlaceholder]' ,
+})
+
+export class PlaceholderDirective {
+
+    constructor(public viewContainerRef : ViewContainerRef) {}
+}
+```
+
+<br>
+
+* Declare the directive in app.module.ts .
+
+* Create a `<ng-template></ng-template>` in the template where we want to implement the dynamic component .
+
+* ng-template will create an exact element in the DOM but we can get access to the place where we using it .
+
+* So use the ng-template with the `hrlperDirective` in the template as below :
+
+### Auth.component.html ###
+
+<br>
+
+```javascript
+...
+<ng-template appPlaceholder></ng-template>    // We can anywhere on the top or the exact place where we want to use it .
+
+<div class="row">
+  <div class="col-xs-12 col-md-6 col-md-offset-3">
+...
+```
+
+<br>
+
+* add `@ViewChild('')` directive with the placeholder in the template in the comonent.ts and store with a variabal name of type of the directive.
+
+<br>
+
+### auth.component.ts ###
+
+<br>
+
+```javascript
+...
+import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
+...
+@ViewChild(PlaceholderDirective, { static: false }) alertHost!: PlaceholderDirective;
+...
+```
+
+<br>
+
+* Declare the new variable with viewContainerref in the method where we creating the component and clear the viewcontainerref with the variable .
+
+<br>
+
+```javascript
+...
+  private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+ }
+...
+```
+
+<br>
+
+* Now call the viewcontainerRef with createComponent method by passing the argument as componentFactory that we have alredy initialized .
+
+<br>
+
+### auth.comonent.ts ###
+
+<br>
+
+```javascript
+...
+ private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+    hostViewContainerRef.createComponent(alertCmpFactory);
+ }
+...
+``` 
+
+<br>
+
+### Note : If the angular version is < 9 , we must decalre the dynamic component in the app.module.ts file under `entryComponent` array ###
+
+```javascript
+...
+@NgModule({
+...
+  ,
+entryComponents : [ AlertComponent]
+})
+...
+```
+
+<br>
+
+
+* IF version is higher than 9 , then there is no need to do this .
+
+
+<br>
+
+# Data Binding and Event Binding in dynamic components #
+
+<br>
+
+* if we want to use the properties and events that are avaiable in the dynamicaly created component , we shouls set a variable to that and access that component with instance keyword.
+
+* The instance method will used to get the properties that are avaiable in the dynamic component .
+
+<br>
+
+```javascript
+  private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+   const componentRef =  hostViewContainerRef.createComponent(alertCmpFactory);
+   componentRef.instance.message = message;             // Using the message property in the alert component with the value here .
+ }
+```
+
+<br>
+
+* We can also access the events with the instance method . 
+
+* In our criteria , our event is an emiter that must be subscribable to it .
+
+* Add the Subscription .
+
+<br>
+
+```javascript
+...
+private closeSub!: Subscription; 
+...
+```
+<br>
+
+* clear the data in the hostContainerRef after unsubscribing to it within subscription method .
+
+<br>
+
+```javascript
+  private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+   const componentRef =  hostViewContainerRef.createComponent(alertCmpFactory);
+     componentRef.instance.message = message;
+
+     this.closeSub = componentRef.instance.close.subscribe( () => {     // Event Binding 
+      this.closeSub.unsubscribe();
+      hostViewContainerRef.clear();
+      
+     } );
+ }
+
+```
+
+<br>
+
+* Finally remove the Authcomponent Subscription by unsubsscribe to it in ngOnDestroy by checking wheather the active subscription is avaiable .
+
+<br>
+
+```javascript
+...
+ ngOnDestroy(): void {
+  if(this.closeSub){
+   this.closeSub.unsubscribe();
+   }
+ }
+...
+```
+
+<br>
+
+# Angular Modules and Optimizing with Angular Apps #
+
+<br>
+
+* Angular Modules refers to the typescript files with the decorator `@ngModule({})` with that .
+
+* ANgular modules are the Arrays that bundles the building blocks of our Angular application that may be AppComponent , ProducsComponent ,
+HightlightDirective , ProductsService and etc .
+
+* Angular application can only aware of the components, services and other features which are provided in the Module . Because angular can not scan the entire Application .
+
+* Every Angular Application atleast need one Module.
+
+* The One Module can be partitoned as many modules .
+
+<br>
+
+<img src="images/module-1.png">
+
+<br>
+
+* Examples : AppModule , APPRoutingModule , etc .
+
+<br>
+
+# Analysing App Module #
+
+<br>
+
+* As we know a module should contain the `@ngModule({})` decorator .
+
+* In the decorator we have many Array of items .
+
+<br>
+
+```javascript
+@NgModule({
+  declarations: [
+...
+  ],
+  imports: [
+...
+  ],
+  providers: [
+...
+  ],
+  bootstrap: [AppComponent]
+  ,
+})
+```
+
+<br>
+
+* The `declaration` array should contain the `components , directives , pipes  ` that we use in our application .
+
+* The `imports` array is responsible to hold the `OtherModules` . It helps to partition the appliication as multiple modules .
+
+* The `providers` array holds the `serices` in our application . We can provide here . Otherwise we can make it happen by adding the below statement in the sevice file which we want provide in the appmodule 
+
+```javascript
+...
+@Injectable({providedIn:'root'})
+...
+```
+* The `bootstrap` array will hold the comonent that must be started first for execution . As it is a Array , We can add more than one component in it .
+
+* The `entryComponents` Array is used rarely when components are created dynamically by programatic method .
+
+<br>
+
+# App-routing Module #
+
+<br>
+
+* This module keeps the routing of our application in seperate module in order to avoid complecation .
+
+<br>
+
+```javascript
+@NgModule({
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule]
+})
+```
+
+<br>
+
+ 
+* This module decorator simply have `imports` array that contains the routerConfigurations of the Application .
+
+* The `exports` array have to contain that Module to use the paricular module in other module . Otherwise , we can not get access to this module in other modules .
+
+<br>
+
+# Creating new subModule from AppModule #
+
+<br>
+
+* We must partiton our Application into various sections to allocate each section with new `NgModule` .
+
+* So , Create the typescript file in the selected folder ehich should be act as a module for that sections that holds multiple components, directives etc .
+
+* Add `@ngModule({})` decorator to the new module file .
+
+* Add `declarations` array as the AppModule . Shift all the new Sections components , directives or pipes that available the AppModule to the new module . Import all them in the new module .
+
+* Add `exports` Array in the new module to get access for all components that are avaiable in the declarationn array . Inside exporst array provide all the elements that we have declared in this new module to export the new module in AppMOdule .
+
+* To utilise the `exports` array elements of this new module , add this `newModule` ito the `imports` array in `AppModule` .
+
+* Add `imports` array in the new module to get all the access like which means BrowserModule , RoutingMOdule, FormsMOdule and etc which we had in the AppModule . Provide the neccessary modules inside thid imports array to get all access that AppMOdule gives us.
+
+* To use the `BrowserModule` , add `CommonModule` inside the `imports` array in new Module instaed of adding `BrowserModule`. The `commonModule` should be imported from `@angular/common`
+
+### Exaple : ###
+
+* In our application we have seperated the recipe section as a module .
+
+### recipe.module.ts ###
+
+<br>
+
+```javascript
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { ReactiveFormsModule } from "@angular/forms";
+import { AppRoutingModule } from "../app-routing.module";
+import { RecipeDetailComponent } from "./recipe-detail/recipe-detail.component";
+import { RecipeEditComponent } from "./recipe-edit/recipe-edit.component";
+import { RecipeItemComponent } from "./recipe-list/recipe-item/recipe-item.component";
+import { RecipeListComponent } from "./recipe-list/recipe-list.component";
+import { RecipeStartComponent } from "./recipe-start/recipe-start.component";
+import { RecipesComponent } from "./recipes.component";
+
+@NgModule({
+    declarations : [
+        RecipesComponent,
+        RecipeListComponent,
+        RecipeDetailComponent,
+        RecipeItemComponent,
+        RecipeStartComponent,
+        RecipeEditComponent,
+    ],
+    imports : [
+        AppRoutingModule,
+        CommonModule,
+        ReactiveFormsModule
+    ],
+    exports : [
+        RecipesComponent,
+        RecipeListComponent,
+        RecipeDetailComponent,
+        RecipeItemComponent,
+        RecipeStartComponent,
+        RecipeEditComponent,
+    ]
+})
+export class RecipeModule {
+
+}
+```
+
+<br>
+
+### App.module.ts ###
+
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { ShoppingListComponent } from './shopping-list/shopping-list.component';
+import { ShoppingEditComponent } from './shopping-list/shopping-edit/shopping-edit.component';
+import { DropdownDirective } from './shared/dropdown.directive';
+import { ShoppingListService } from './shopping-list/shopping-list.service';
+import { AppRoutingModule } from './app-routing.module';
+import { RecipeService } from './recipes/recipe.service';
+import { AuthComponent } from './auth/auth.component';
+import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinner.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AuthInterceptorService } from './auth/auth-interceptor.service';
+import { AlertComponent } from './shared/alert/alert.component';
+import { PlaceholderDirective } from './shared/placeholder/placeholder.directive';
+import { RecipeModule } from './recipes/recipe.module';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    ShoppingListComponent,
+    ShoppingEditComponent,
+    DropdownDirective,
+    AuthComponent,
+    LoadingSpinnerComponent,
+    AlertComponent,
+    PlaceholderDirective
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    AppRoutingModule,
+    NgbModule,
+    RecipeModule
+  ],
+  providers: [
+    ShoppingListService, 
+    RecipeService,
+    {
+      provide : HTTP_INTERCEPTORS,
+      useClass : AuthInterceptorService,
+      multi : true
+    }
+  ],
+  bootstrap: [AppComponent]
+  ,
+entryComponents : [ AlertComponent]
+})
+export class AppModule {}
+
+```
+
+<br>
 
 
 
+# Shifting routing module to the feature module or sub module #
 
+<br>
+
+### app.routing.module.ts file before doing sub-routing ###
+
+<br>
+
+```javascript
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+
+import { RecipesComponent } from './recipes/recipes.component';
+import { ShoppingListComponent } from './shopping-list/shopping-list.component';
+import { RecipeStartComponent } from './recipes/recipe-start/recipe-start.component';
+import { RecipeDetailComponent } from './recipes/recipe-detail/recipe-detail.component';
+import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
+import { RecipesResolverService } from './recipes/recipes-resolver.service';
+import { AuthComponent } from './auth/auth.component';
+import { AuthGauard } from './auth/auth.guard';
+
+const appRoutes: Routes = [
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  {
+    path: 'recipes',
+    component: RecipesComponent,
+    canActivate : [AuthGauard] ,
+    children: [
+      { path: '', component: RecipeStartComponent },
+      { path: 'new', component: RecipeEditComponent },
+      {
+        path: ':id',
+        component: RecipeDetailComponent,
+        resolve: [RecipesResolverService]
+      },
+      {
+        path: ':id/edit',
+        component: RecipeEditComponent,
+        resolve: [RecipesResolverService]
+      }
+    ]
+  },
+  { path: 'shopping-list', component: ShoppingListComponent },
+  { path: 'auth', component: AuthComponent }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}
+
+```
+
+<br>
+
+* In this RoutingModule , we want to sepearate the recipes related routes to the recipes module .
+
+* Inorder to do it , create a new typescript file with ngmodule decorator in the recipes folder . Shift the neccessary routes in the app.routing.module.ts file .
+
+* In new Module , import all missing modules .
+
+* In app-routingModule , delete unwanted imports .
+
+* In new-routingMOdule , add `imports` array in ngModule decorator as we have in the app-routingModule .
+
+* Inside the `imports` array , access the `RouterModule` with  `forChild( router_variable ) ` method insted we use `forroot` method in the AppModule . 
+
+* Add the `exports` array in the new-routing.module and provide `RouterModule`  inside it to get access for this route in the newModule by adding this exprted module in it's imports section .
+
+<br>
+
+### app-routing.module.ts ###
+
+<br>
+
+```javascript
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { ShoppingListComponent } from './shopping-list/shopping-list.component';
+import { AuthComponent } from './auth/auth.component';
+
+const appRoutes: Routes = [
+  { path: '', redirectTo: '/', pathMatch: 'full' },
+  { path: 'shopping-list', component: ShoppingListComponent },
+  { path: 'auth', component: AuthComponent }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(appRoutes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule {}
+
+```
+
+<br>
+
+### recipe-routing.module.ts ###
+
+<br>
+
+```javascript
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+import { AuthGauard } from "../auth/auth.guard";
+import { RecipeDetailComponent } from "./recipe-detail/recipe-detail.component";
+import { RecipeEditComponent } from "./recipe-edit/recipe-edit.component";
+import { RecipeStartComponent } from "./recipe-start/recipe-start.component";
+import { RecipesResolverService } from "./recipes-resolver.service";
+import { RecipesComponent } from "./recipes.component";
+
+
+const recipeRoutes : Routes = [
+    {
+        path: 'recipes',
+        component: RecipesComponent,
+        canActivate : [AuthGauard] ,
+        children: [
+          { path: '', component: RecipeStartComponent },
+          { path: 'new', component: RecipeEditComponent },
+          {
+            path: ':id',
+            component: RecipeDetailComponent,
+            resolve: [RecipesResolverService]
+          },
+          {
+            path: ':id/edit',
+            component: RecipeEditComponent,
+            resolve: [RecipesResolverService]
+          }
+        ]
+      },
+]
+
+@NgModule({
+ imports : [ RouterModule.forChild(recipeRoutes) ] ,
+ exports : [ RouterModule ]
+})
+
+export class RecipeRoutingModule {
+
+}
+```
+
+<br>
+
+### recipe.module.ts ###
+
+<br>
+
+```javascript
+...
+    imports : [
+      ...
+        RecipeRoutingModule
+    ],
+...
+```
+
+<br>
+
+### Note : As we now handle the sub Module and routing we don't want to export our components in the newModule . we can remove it from newModule ###
+
+<br>
+
+### recipe.module.ts ###
+
+<br>
+
+```javascript
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { ReactiveFormsModule } from "@angular/forms";
+import { AppRoutingModule } from "../app-routing.module";
+import { RecipeDetailComponent } from "./recipe-detail/recipe-detail.component";
+import { RecipeEditComponent } from "./recipe-edit/recipe-edit.component";
+import { RecipeItemComponent } from "./recipe-list/recipe-item/recipe-item.component";
+import { RecipeListComponent } from "./recipe-list/recipe-list.component";
+import { RecipeRoutingModule } from "./recipe-routing.module";
+import { RecipeStartComponent } from "./recipe-start/recipe-start.component";
+import { RecipesComponent } from "./recipes.component";
+
+@NgModule({
+    declarations : [
+        RecipesComponent,
+        RecipeListComponent,
+        RecipeDetailComponent,
+        RecipeItemComponent,
+        RecipeStartComponent,
+        RecipeEditComponent,
+    ],
+    imports : [
+        AppRoutingModule,
+        CommonModule,
+        ReactiveFormsModule,
+        RecipeRoutingModule
+    ],
+// reomved exports here !
+})
+export class RecipeModule {
+
+}
+```
+
+<br>
+
+
+# Shared MOdule #
+
+<br>
+
+* We can use the shared module between many modules that appear similar . 
+
+* It will avoid code duplication in our application .
+
+* When we use shared modules , we should provide all the components and decorators inside the exports array .
+
+<br>
+
+### Shared-module.ts ###
+
+<br>
+
+```javascript
+import { CommonModule } from "@angular/common";
+import { NgModule } from "@angular/core";
+import { AlertComponent } from "./alert/alert.component";
+import { DropdownDirective } from "./dropdown.directive";
+import { LoadingSpinnerComponent } from "./loading-spinner/loading-spinner.component";
+import { PlaceholderDirective } from "./placeholder/placeholder.directive";
+
+@NgModule({
+    declarations : [
+    LoadingSpinnerComponent,
+    AlertComponent,
+    DropdownDirective,
+    PlaceholderDirective
+] ,
+imports : [
+    CommonModule
+] ,
+exports : [
+    LoadingSpinnerComponent,
+    AlertComponent,
+    DropdownDirective,
+    PlaceholderDirective ,
+    CommonModule
+]
+
+})
+
+
+export class SharedModule {
+
+}
+```
+
+<br>
+
+
+* Update the `imports` array in other modules includeing AppModule . In our example we can only share the Common Module . But We can do for any number of Modules .
+
+<br>
+
+# The Core Module #
+
+<br>
+
+* It is also the same ngModule . But we can have our services which are available in the providers array of our module in this core module as seperate module .
+
+* It reduces the code in appModule .
+
+<br>
+
+### core.module.ts ###
+
+<br>
+
+```javascript
+import { HTTP_INTERCEPTORS } from "@angular/common/http";
+import { NgModule } from "@angular/core";
+import { AuthInterceptorService } from "./auth/auth-interceptor.service";
+import { RecipeService } from "./recipes/recipe.service";
+import { ShoppingListService } from "./shopping-list/shopping-list.service";
+
+@NgModule({
+        providers: [
+            ShoppingListService, 
+            RecipeService,
+            {
+              provide : HTTP_INTERCEPTORS,
+              useClass : AuthInterceptorService,
+              multi : true
+            }
+          ],
+})
+export class CoreServicesModule {}
+```
+
+<br>
+
+* To use the core module services in the module , Add the coreModule in to the needed modules imports array .
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+..
+  imports: [
+....
+    CoreServicesModule
+  ],
+  ...
+```
+
+<br>
+
+# Optimization #
+
+<br>
+
+# Lazy loading #
+
+<br>
+
+* Even we partioned our application into multiple modules , we cannot increase the loading time .
+
+* Using lazy loading , we can decrease the loading time . Lazy loading only loads the page what we need with it's bunch of code using the javascript feature .
+
+<br>
+
+# Implementing lazy loading #
+
+<br>
+
+### File sizes before adding lazy loading ###
+
+<br>
+
+<img src="images/lazy-load-1.png">
+
+<br>
+
+* To implement routing in any feature Module , It must be have its `own routing` .
+
+* Remove the path in the feature module Router and set it to ` '' ` .
+
+<br>
+
+### Recipr-routing.module.ts ###
+
+<br>
+
+```javascript
+...
+const recipeRoutes : Routes = [
+    {
+        path: '',   // Set to empty .
+    }   
+]
+...
+```
+
+<br>
+
+* Add a new path for the recipe module in the app-routing module.
+
+<br>
+
+### app-routing.module.ts ###
+
+<br>
+
+```javascript
+const appRoutes: Routes = [
+  ...
+  { path : 'recipe' }      // Add route for the feature module 
+];
+```
+
+<br>
+
+* Add `loadChildren` in the property in the route to tell angular that load the component when only is needed .
+
+<br>
+
+```javascript
+...
+  { path : 'recipe' , loadChildren : }
+...
+``` 
+<br>
+
+* For the load childeren property , pass the arrow function as an argument that arrow function as below :
+
+<br>
+
+```javascript
+  { path : 'recipe' , loadChildren : () => import('./recipes/recipe.module').then( m => m.RecipeModule)    }
+```
+<br>
+
+* The function should have the `import` which is a string that should have the relative path of the Module we want to implement lazy load .
+
+* Them , add the `promise` with `then()` that should return the Module that the path refers to .
+
+### NOTE : After adding lazy loading to the components we must restart the application by `ngserve` to get the result ###
 
 
 
