@@ -1,11 +1,12 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
+import { LoggingService } from "../logging-service";
 import { SharedModule } from "../shared/shared-module";
 import { ShoppingListComponent } from "./shopping-list.component";
 
 
 const ShoppingListRoutes : Routes = [
-  { path: 'shopping-list', component: ShoppingListComponent },
+  { path: '', component: ShoppingListComponent },
 ]
 
 
@@ -14,7 +15,8 @@ const ShoppingListRoutes : Routes = [
     RouterModule.forChild(ShoppingListRoutes) ,
     SharedModule
    ] ,
-  exports : [RouterModule]
+  exports : [RouterModule],
+  providers: [LoggingService]
 })
 
 export class ShoppingListRoutingModule {

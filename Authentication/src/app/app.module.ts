@@ -8,11 +8,9 @@ import { HeaderComponent } from './header/header.component';
 import { AppRoutingModule } from './app-routing.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AlertComponent } from './shared/alert/alert.component';
-import { RecipeModule } from './recipes/recipe.module';
-import { ShoppingListModule } from './shopping-list/shopping-list.module';
 import { SharedModule } from './shared/shared-module';
 import { CoreServicesModule } from './core.module';
-import { AuthModule } from './auth/auth.module';
+import { RecipeModule } from './recipes/recipe.module';
 
 @NgModule({
   declarations: [
@@ -26,11 +24,9 @@ import { AuthModule } from './auth/auth.module';
     HttpClientModule,
     AppRoutingModule,
     NgbModule,
-    RecipeModule,
-    ShoppingListModule ,
     SharedModule,
     CoreServicesModule,
-    AuthModule
+    RecipeModule
   ],
 
   bootstrap: [AppComponent]

@@ -10,7 +10,7 @@ import { RecipesComponent } from "./recipes.component";
 
 const recipeRoutes : Routes = [
     {
-        path: '',
+        path: 'recipes',
         component: RecipesComponent,
         canActivate : [AuthGauard] ,
         children: [

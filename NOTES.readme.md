@@ -10098,25 +10098,828 @@ const appRoutes: Routes = [
 
 * The function should have the `import` which is a string that should have the relative path of the Module we want to implement lazy load .
 
-* Them , add the `promise` with `then()` that should return the Module that the path refers to .
+* Then , add the `promise` with `then()` that should return the Module that the path refers to .
+
+* After implementing lazy loading in the routingModule , `remove` the modules in the `declarations` Array in `app.module.ts` . Otherwise it will `show error` or `did not load`
+
+<br>
+
+```javascript
+...
+@NgModule({
+ 
+  imports: [
+   
+    // RecipeModule,      // remove this if implemented lazy loading 
+  
+  ],
+
+  bootstrap: [AppComponent]
+  ,
+entryComponents : [ AlertComponent]
+})
+export class AppModule {}
+...
+```
+
+<br>
 
 ### NOTE : After adding lazy loading to the components we must restart the application by `ngserve` to get the result ###
 
+<br>
+
+### File sizes after implemented lazy loading for single Module and restarted it with ng serve ###
+
+<br>
+
+<img src="images/lazy-load-2.png">
+
+<br>
+
+* So we can see the difference between the file sizes and it is obviously reduced to certain level . 
+
+<br>
+
+# Preloading strategy #
+
+<br>
+
+* We can preload the modules by using the `proloadingtrategy: preloadAllModules` in the rootModule .
+
+<br>
+
+```javascript
+...
+  imports: [RouterModule.forRoot(appRoutes ,  {preloadingStrategy : PreloadAllModules} ) ],
+...
+```
+<br>
+
+# Modules and services #
+
+<br>
+
+<img src="images/dif-ser-1.png">
+
+<br>
+
+# Loading services differently #
+
+<br>
+
+* The services we provide in the `lazyloaded` module will give different behaviour compared to the app services . 
+
+* So there is a possibility of occurance of bugs in it . Mostly avoid it .
+
+<br>
+
+# AheadOfTime Compilation vs JustIntime Compilation #
+
+<br>
+
+<img src="images/aot-jit-1.png">
+
+<br>
+
+* Before deploy the application use `ng build --prod` or `ng build --configuration production` `{ form latest versions }`command to increase the optimisation of the application .
+
+* This command will checks for some optimizes codes in the application .If it finds some unPotimizes code , it will show error .
+
+* This will download new files to our application with reduced file sizes .
+
+* After using this command , use `ng serve` .
+
+<br>
+
+<img src="images/aot-jit-2.png">
+
+<br>
+
+# Working with NgRx #
+
+<br>
+
+* NgRx is used to manage the states in the complex application .
+
+* It is mainteained by Angular team .
+
+<br>
+
+# Application State #
+
+<br>
+
+* `State` can be defined as `data that is important for the Application and influences what visibles on the screen` .
+
+* It may be waiting state { waiting for the data from backend } , loading state , etc .
+
+* Below is example Application's state :
+
+<br>
+
+<img src="images/ngrx-1.png">
+
+<br>
+
+# Reasons to use state in Application #
+
+<br>
+
+* We are using state in the every application that means we will definitely store data in services and interact with api to fetch data, delete data and etc . This is called state which managing data .
+
+* It is okay for the smaller application . ( Using Components and Services to handle the data and the template ) .
+
+* But , when the Application is getting complex that means the data is growing huge , we should handle the `rxjs` state management to avoid the unwanted confusions while handling data .
+
+<br>
+
+# Issues with Rxjs (  Reactive Extension for Javascript ) Approach #
+
+<br>
+
+* The `state` in the sense , it is `data` . Below are the some common issues faced while using Rxjs approach .
+
+* The data can be updated anywhere in the Application and it is changable and interacting with http is not clear .
+
+* To avoid these probelems , we should use `Redux pattern` to manage the `state or data` .
+
+<br>
+
+<img src="images/ngrx-2.png">
+
+<br>
 
 
+# Redux #
+
+<br>
+
+* Redux is the `State Management pattern `  .
+
+* It is also available as a library so that we can use this Redux pattern in any application .
+
+* To use this `Redux` pattern in any application , we must aware or have this pre-defined setup in our application .
+
+* To implement the Redux pattern to handle state ( data ) in any application , we must have knwolede on the some concepts .
+
+<br>
+
+# Redux-Pattern --> Store #
+
+<br>
+
+* As the name suggests , `Store` is the place which containes all the data ( Application State ) of whole application .
+
+* It stores the data of an application as a `javascript Object notation from various components and services or modules ` .
+
+* The data is categorized with nested objects according to the application .
+
+<br>
+
+```javascript
+Store --> Application Data (Just an example view not exact one )
+
+{
+  component 1 : value ,
+  ..
+  component n : value ,
+  ...
+  ,
+  property : {
+    nested property : value ;
+    ..
+  }
+  .
+  .
+  .
+}
+```
+
+<br>
+
+* The various parts of the Application still receives ( Components and Services ) their state ( data ) from the one area that is from `Store ( Application State )`
+
+<br>
+
+<img src="images/ngrx-3.png">
+
+<br>
+
+# Redux-Pattern --> Actions #
+
+<br>
+
+* Again as the name suggests , `Actions` are the activities like `add , delete , edit , view or anything to the store ( Aplication State ) ` .
+
+* If `Store` is available for any application then we can `receive data` from anywhere on the application . Simultaneously , we should need to perform some operations ( Actions like add , edit , delete and etc ) to that store ( Application state ) . To achive this , the `Actions` help us .
+
+* `Actions` is also the `Javascript Representation with the identifier and optionally the payload`  . The `identifier` refers to the `Kind of Action need to be performed like add , delete and etc ` and  `payload` refers to the `extra information on the action like  `  
+
+* For example , if any data is added to the Array which is available in the `Store` , then the `Action` will update as javascript object natation as below :
+
+<br>
+
+```javascript
+
+( Just an Example not exact one )
+...
+idetifier : payload ,
+Add : Array[7] = 10 ;
+...
+...
+```
+
+<br>
+
+### Note : The Actions should not reach the Store directly ###
+
+<br>
+
+<img src="images/ngrx-4.png">
+
+<br>
+
+# Redux-Pattern --> Reducer #
+
+<br>
+
+* The Actions will use the `Reducers` to reach the `Store ( Application State )` .
+
+* The Reducers are the `Simple Javascript Function` .
+
+* The Reducer javascript function will have the Store with it and require the Actions as the input .
+
+* It has been handled by the library itselt . We can consider these things to our understanding like , there are two arguments for Reducer javascript function they are :
+
+* The one arguments is the `Store` which is the Application state `( The current data of the application )` .
+
+* The Second Argument is the `Actions` which contains the `updation on the existing data` like add , edit , delete or any .
+
+* The Reducer function will procees the argumemts . It will do not do anything in the excisting state ( Data ) . It copies the state and do the Actions in the copy itself and override the old state with the copy of the oldstate which updated by the Actions .
+
+* We can simply consider the Reducer function like ( Only for understanding the concept not exact one )
+
+<br>
+
+```javascript
+ReducerFunction ( ExisitingState , Actions ) {
+
+    const Existing State = { ... } ;
+
+    let Actions = { ... } ;
+
+    const copyOffExistingStae  = ExistingState  ;
+
+     copyOfExistingState { ... } =  copyOfExistingState { ... }  + Actions { ... } ;
+
+     return copyOfExistingState ; 
+}
+
+```
+
+<br>
 
 
+<img src="images/ngrx-5.png">
+
+<br>
+
+# Angular with Redux Pattern ( NgRx ) #
+
+<br>
+
+* The Redux pattern is not only for React js . This pattern can be used by Angular also .
+
+* The `Angular implementation of Redux patttern` is known as `Ngrx` .
+
+<br>
+
+## Advantages of Ngrx or specific features with Ngrx ##
+
+ * It is mostly gives easy interaction with angular application like components and services .
+
+ * It uses the Rxjs library to implemt the Observables for whole application .
+
+ * Also supprots typescript .
+
+ <br>
+
+ ## Side Effect of using Ngrx  ##
+
+ <br>
+
+ * The Reducer will not handle the Asynchrnous code ( http request ) .
+
+ * To overcome this ngrx have some criteria .
+
+ <br>
+
+ <img src="images/ngrx-6.png">
+
+<br>
+
+# Implementing Ngrx to our project #
+
+<br>
+
+# Install in the application #
+
+<br>
+
+* As NgRx is the library , we should install it through angular cli . It is managed by the Angular team .
+
+* To install the package in our application , use the below commend :
+
+<br>
+
+```javascript
+npm install --save @ngrx/store
+```
+<br>
+
+* After installation completed , the `ngrx` can be found in our `package.json` file dependencies .
+
+* We need to serve the application to implement the package installation .
+
+<br>
+
+<img src="images/ngrx-7.png">
+
+<br>
 
 
+# Reducers #
+
+<br>
+
+* We should add the Reducer function in a typescript file to a module . 
+
+* Our Module holds the components with their services ( Store (Application data ) ) . So we need to implement the Ngrx for each Module in our Application .
+
+* Create a sepearte file for Reducer function . 
+
+* For my case , i have created Reducer function for Shopping-list Module named `Shopping-list.reducer.ts` .
+
+* The file must export the function with two arguments as below : 
+
+<br>
+
+### shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+export function shoppingListReducer( state , action ) {
+...
+}
+```
+
+<br>
+
+* Now , we have to pass the arguments : 
+
+* The first argument is `state` . As we know , state in the sense data that we handle in our module . We can find it in the sevices .
+
+* We should set the initial state as the object notation . The object notation is used to handle any type of store data like array , int , string and etc .
+
+* So , declare a new variable with the inital state of object notation .
+
+<br>
+
+```javascript
+const initialState = {         // Decalre initial state with object notation 
+    
+}
+
+export function shoppingListReducer( state , action ) {
+
+}
+```
+
+<br>
+
+* The initial state value could be the property we store in the service . just copy the initial value from services and provide it in the Object notation as propert with value .
+
+* In my example i have the array of ingredeient as my data as below :
+
+<br>
+
+### Shopping-list.service.ts ###
+
+<br>
+
+```javascript
+...
+  private ingredients: Ingredient[] = [
+    new Ingredient('Apples', 5),
+    new Ingredient('Tomatoes', 10),
+  ];
+  ...
+```
+
+<br>
+
+* I can use this in my reducer inital state as below : 
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { Ingredient } from "../shared/ingredient.model";    // Imoport it
+
+const initialState = {
+
+    ingredients  : [                          // initial state as propert , value pair 
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( state , action ) {
+
+}
+```
+
+<br>
+
+* So we can set the first argument of our reducer function as the initial state as below :
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+import { Ingredient } from "../shared/ingredient.model";    // Imoport it
+
+const initialState = {
+
+    ingredients  : [                          // initial state as propert , value pair 
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( state = initialState, action ) {      // Assign the initial state value to state argument 
+
+}
+...
+```
+
+<br>
+
+* Setting the initial state to the first argument of the reducer function will set the store glibally by ngrx . 
+
+* Once the state is initialized , it will be previous state for further implementations . 
+
+<br>
+
+# Adding Logic to Reducer #
+
+<br>
+
+### Reducer function with the initial state value ( shopping-list.reducer.ts ) ### 
+
+<br>
+
+```javascript
+import { Ingredient } from "../shared/ingredient.model";    // Imoport it
+
+const initialState = {
+
+    ingredients  : [                          // initial state as propert , value pair 
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( state = initialState, action ) {      // Assign the initial state value to state argument 
+
+}
+```
+
+<br>
+
+* We have the reducer function with initial state value . So we can implement the logic for our Reducer function  .
+
+* The second argument for the reducer function is `actions` . The action should be patched with this function .
+
+* Before patching the `Actions` into the reducers , we must know how to handle the actions argument in this reducer function .
+
+* There may be lot of actions available like add , delete , edit or etc . So we can use `switch case` to handle them all .
+
+* The swich case condition should be access the type of action of the argument .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+export function shoppingListReducer( state = initialState, action ) {       
+
+    switch(action.type){         // Accessing the type of action argument 
+
+    }
+}
+...
+```
+<br>
+
+* But to handle this `type` , the action argument should be of have the interface  `Action` which is imported from @ngrx/store .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";    // import Action
+...
+export function shoppingListReducer( state = initialState, action : Action) {     // Define the argument of type Action 
+
+    switch(action.type){         // Accessing the type of action argument 
+     
+    }
+}
+```
+<br>
+
+* This Action interface will forcs the action argument to have the `type` method .
+
+* There may be various types according to the application .
+
+* According to our Application service , Add ingredient will change the state and need to consider that as an action .
+
+<br>
+
+### Shopping-list-reducer.ts ###
+
+<br>
+
+```javascript
+...
+ addIngredient(ingredient: Ingredient) {
+    this.ingredients.push(ingredient);
+    this.ingredientsChanged.next(this.ingredients.slice());
+  }
+...
+```
+<br> 
+
+* So we should use the action as an case in the switch case in our Reducer function .
+
+<br>
+
+```javascript
+...
+  switch(action.type){         // Accessing the type of action argument 
+      case 'ADD_INGREDIENT'      //  Access any action with case 
+    }
+...
+```
+
+<br>
+
+* use `Uppercase` to specilaise the case . This is our choise to select name according the action .
+
+* Here , As we discussed Actions concept , the `action.type` acts as the `specified property or identifier ` and `case with value` acts as the `string that tells about action`   
+
+* Now , we have got the two arguments to implement the reducer function . 
+
+* The Reducer function should not modify the existing state . We should only modify the copy of the exisiting state .
+
+* So we should `return` the new state of `objcet type` which Overrides the old State of Object type with new action .
+
+<br>
+
+### shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+    switch(action.type){          
+      case 'ADD_INGREDIENT' :     
+          return {  } ;    // return new state of object type 
+}      
+```
+<br>
+
+* So override the old state with new state of obeject overriding with the action . But the `action` is not provided here .
+
+<br>
+
+### shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";   
+import { Ingredient } from "../shared/ingredient.model";   
+
+const initialState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( state = initialState, action : Action)  {     
+    switch(action.type){          
+      case 'ADD_INGREDIENT' :      
+          return { 
+            ...state   ,  // copy the old state with spred operator .
+           ingredients: [ ...state.ingredients , action ]        // override the old state with spread operator with new action 
 
+           } ;          
+    }
+}
+```
+<br>
+
+# Adding Actions #
+
+<br>
+
+* We have added a reducer function in our Module as below :
+
+<br>
+
+### shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";   
+import { Ingredient } from "../shared/ingredient.model";   
+
+const initialState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
+
+
+export function shoppingListReducer( state = initialState, action : Action)  {     
+    switch(action.type){          
+      case 'ADD_INGREDIENT' :      
+          return { 
+            ...state   ,  
+           ingredients: [ ...state.ingredients , action ]        
+
+           } ;          
+    }
+}
+```
+<br>
+
+* In the above Reducer function , the condition in switch case `case 'ADD_INGREDIET' ` will do not check anything because we have not set the Action anywhere in this function .
+
+* The Ngrx allow us to implement the Actions in seperate file and we can link the Actions in this Reducer .
+
+* Create a new file with .actions.ts extension . In my case , i have created the `shopping-list.actions.ts` .
+
+* Now we got more than one file related store . So create subfilder under the module and provide these files in the subfolder .
+
+* For my case , i have created the `store` sub-folder under `Shopping-list Module` and provided the reducer.ts file and actions.ts file inside it .
+
+* In the Shopping-list.actions.ts file , we must export the `constant variable` , the name of the variable should be the same that we used as the case value  ( Including the Uppercse ) in the reducer function. 
+
+* Assign the constant variable to the same name as uppercase but as a string .
+
+* In my case , the case is like below name : ( 'Add_InGREDIENTS' )
+
+<br>
+
+### shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+ switch(action.type){          
+      case 'ADD_INGREDIENT' :  
+      ...
+ }
+ ...
+```
+
+<br>
+
+
+* So , i have declared and assigned the variable in actions.ts file as below :
+
+<br>
+
+### shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+```
+<br>
+
+* we are `exporting` the variable which is going to have the Action in it from `actions.ts file` .
+
+* So , we can `import` this variable in our reducer function and can use this variable as a case in the `reducer.ts file `.
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { ADD_INGREDIENT } from "./shopping-list.actions";           // import from the Action.ts
+
+
+export function shoppingListReducer( state = initialState, action : Action)  {     
+    switch(action.type){          
+      case ADD_INGREDIENT :         // Use it in the case condition 
+...
+           } ;   
+```
+
+<br>
+
+* Now , we should describe our Action with the value of the variable we declared in actions.ts file . ( 'ADD_INGREDIENT') .
+
+* To do this , we should export a class with meaningful name related to our Action ( ADD_INGREDIENT ) { Use only Pascal case for Class name } and that must implemts the `Action` interface imported from `@ngrx/store`
+
+<br>
+
+### Shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+    
+}
+```
+<br>
+
+* The Action interface forces us to implement the `type` property . The type property should have the value of the Action constant we declared with spcific type `readonly`
+
+<br>
+
+### Shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT             // Implement type property 
+}
+```
+<br>
+
+* And Add a second propety with own name which should have the model of the state . ( In my case Ingredient ) import it .
+
+<br>
+
+### shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+import { Ingredient } from "src/app/shared/ingredient.model";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  payload!: Ingredient;                       // Assign model with variable
+}
+```
+<br>
 
 
 
