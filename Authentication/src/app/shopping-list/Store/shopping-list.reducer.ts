@@ -1,8 +1,11 @@
-import { Action } from "@ngrx/store";   
 import { Ingredient } from "src/app/shared/ingredient.model";
-import { ADD_INGREDIENT } from "./shopping-list.actions";           // import from the Action.ts
+import * as ShoppingListActions from "./shopping-list.actions";          // import the whole Actions class with a new Object name .
 
-const initialState = {
+export interface ShoppingListState{
+  ingredients: Ingredient[];
+}
+
+const initialState : ShoppingListState = {
 
     ingredients  : [                         
         new Ingredient('Apples', 5),
@@ -11,13 +14,56 @@ const initialState = {
 }
 
 
-export function shoppingListReducer( state = initialState, action : Action)  {     
+export function shoppingListReducer(  
+  state : ShoppingListState = initialState,
+   action : ShoppingListActions.ShoppingListActions     // Calling with nested approach
+   ) : ShoppingListState {     
     switch(action.type){          
-      case ADD_INGREDIENT :         // Use it in the case condition 
+      case ShoppingListActions.ADD_INGREDIENT :          // First Action
           return { 
-            ...state   ,  // copy the old state with spred operator .
-           ingredients: [ ...state.ingredients , action ]        // override the old state with spread operator with new action 
+            ...state   ,  
+           ingredients: [ ...state.ingredients , action.payload ]         
+         } ;  
 
-           } ;          
+         case ShoppingListActions.ADD_INGREDIENTS :      // Second Action
+           return {
+          ...state ,
+          ingredients : [ ...state.ingredients , ...action.payload]
+         }
+
+         case ShoppingListActions.UPDATE_INGREDIENT:
+         
+         const ingredient = state.ingredients[action.payload.index] ;
+
+         const updatedIngredient = {
+             ...ingredient ,
+             ...action.payload.ingredient
+         };
+
+         const udatedIngredients = [ ... state.ingredients];
+         udatedIngredients[action.payload.index] = updatedIngredient ;
+
+         return {
+          ...state ,
+          ingredients : udatedIngredients,
+         }
+
+         case ShoppingListActions.DELETE_INGREDIENT:
+
+        //  const ingredient = state.ingredients[action.payload]
+
+         return {
+          ...state,
+          ingredients : state.ingredients.filter(
+            ( ig , igIndex ) => {
+              return igIndex !== action.payload
+            }
+          )
+         }
+         
+       default : {
+        return  state;             
+       }  
     }
+    
 }

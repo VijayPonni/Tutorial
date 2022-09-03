@@ -10921,25 +10921,916 @@ export class AddIngredient implements Action {
 ```
 <br>
 
+# Setting Up the Ngrx Store #
+
+## Things need to be arranged before setting Ngrx ##
+
+<br>
+
+* We have setted the Reducer function and Actions as below : But need to do more stting for Ngrx .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";   
+import { Ingredient } from "src/app/shared/ingredient.model";
+import { ADD_INGREDIENT } from "./shopping-list.actions";           // import from the Action.ts
+
+const initialState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( state = initialState, action : Action)  {     
+    switch(action.type){          
+      case ADD_INGREDIENT :         // Use it in the case condition 
+          return { 
+            ...state   ,  // copy the old state with spred operator .
+           ingredients: [ ...state.ingredients , action ]        // override the old state with spread operator with new action 
+
+           } ;          
+    }
+}
+```
+<br>
+
+### Shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+import { Ingredient } from "src/app/shared/ingredient.model";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  payload!: Ingredient;                       // Assign model with variable
+}
+```
+<br>
+
+* Before Setting up Ngrx store , we must improve our these two files little .
+
+* In our Reducer function , we just importing the `ADD_INGRDIENT` variable from the Actions class .
+
+* But , we should import the class and access the ADD_INGREDIENT variable whereever it has been used in the Reducer function .
+
+* To the Actions class and use the variable in reducer function as below :
+
+<br>
+
+```javascript
+...
+import * as ShoppingListActions from "./shopping-list.actions";          // import the whole Actions class with a new Object name .
+...
+export function shoppingListReducer( state = initialState, action : Action)  {     
+    switch(action.type){          
+      case ShoppingListActions.ADD_INGREDIENT :         // Call the variable with it's Object 
+         ...
+}
+}
+```
+<br>
+
+* Next , In our reducer function , we have defined the second argument as Actions and imported it from '@ngrs/store' . In our Actions file , we have created the class which implements the same Actions in real time . SO must use the `Actions` in Actions file insted of using it directly in the reducer function .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+```javascript
+...
+export function shoppingListReducer( 
+  state = initialState,
+   action : ShoppingListActions.AddIngredient    // Call the AddIngredient class which implements Action from ActionsFile ( ShoppingListActions )
+   )  {  ...}
+   ...
+```
+<br>
+
+*   Next , we are having action implementation inside the Reducer function , So should update it with the action payload that we are using in Actions .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+ return { 
+...state   ,  
+ingredients: [ ...state.ingredients , action.payload ]         // Update action with action.payload 
+} ; 
+...
+```
+<br>
+
+* So , we have set Up all pre requests to implement the `Store` in the Applicatio . But these things will not cause any effect . 
+
+<br>
+
+### Shopping-list.Reducer.ts ###
+
+<br>
+
+```javascript
+import { Ingredient } from "src/app/shared/ingredient.model";
+import * as ShoppingListActions from "./shopping-list.actions";          // import the whole Actions class with a new Object name .
+
+const initialState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( 
+  state = initialState,
+   action : ShoppingListActions.AddIngredient    // Call the AddIngredient class which implements Action from ActionsFile ( ShoppingListActions )
+   )  {     
+    switch(action.type){          
+      case ShoppingListActions.ADD_INGREDIENT :         // Call the variable with it's Object 
+          return { 
+            ...state   ,  
+           ingredients: [ ...state.ingredients , action.payload ]         // Update action with action.payload 
+
+           } ;          
+    }
+}
+```
+<br>
+
+### Shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+import { Ingredient } from "src/app/shared/ingredient.model";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  payload!: Ingredient;                       // Assign model with variable
+}
+```
+<br>
+
+## Setting up Ngrx in the Application ##
+
+<br>
+
+* To setup the NgRx in the Application , go to the `App.module.ts` .
+
+* Import `StoreModule` from '@ngrx/store' .
+
+* Provide the StoreModule inside the  Imports Arrray with the `forroot()` method .
+
+* The forRoot() method will get an Object .
+
+* The Object's Property can be nameed by us But the the value of the object must be the `reducerFunction` and that should be imported from it' location.
+
+<br>
+
+### App.module.ts ###
+
+<br>
+
+```javascript
+...
+import { shoppingListReducer } from './shopping-list/Store/shopping-list.reducer';   // Import it
+
+@NgModule({
+..
+  imports: [
+   ...
+    StoreModule.forRoot( { ShoopingListStore : shoppingListReducer} )   
+  ],
+  ...
+})
+export class AppModule {}
+
+```
+<br>
+
+## Note : For latest versions , it will show error . Me too faces the Error and rectifies that by utilizing this solution ##
+
+<br>
+
+### Probelrm Faced during Compiling After added  the Reducer in app.module.ts ###
+
+<img src="images/ngrx-8.png">
+
+<br>
+
+### Solution ###
+
+* We should add a seperate file for reducer and make some alternation to the existing reducers a below :
+
+<br>
+
+### <a href="https://stackoverflow.com/questions/66165872/types-of-parameters-action-and-action-are-incompatible-property-payload-i"> Click me To solve </a>
+
+### Shopping-list.main-reducer.ts ( New Reducer ) ###
+
+<br>
+
+```javascript
+import { ShoppingListState,  shoppingListReducer } from './Store/shopping-list.reducer';
+import { ActionReducerMap } from '@ngrx/store';
 
 
+export const rootReducer = {};
+
+export interface AppState {
+    shoppingList: ShoppingListState;
+};
 
 
+export const reducers: ActionReducerMap<AppState, any> = {
+    shoppingList: shoppingListReducer
+};
+```
+
+<br>
+
+### Shopping-list.reducer.ts  ( Modified ) 
+
+<br>
+
+```javascript
+import { Ingredient } from "src/app/shared/ingredient.model";
+import * as ShoppingListActions from "./shopping-list.actions";          // import the whole Actions class with a new Object name .
+
+export interface ShoppingListState{
+  ingredients: Ingredient[];
+}
+
+const initialState : ShoppingListState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( 
+  state : ShoppingListState = initialState,
+   action : ShoppingListActions.AddIngredient    // Call the AddIngredient class which implements Action from ActionsFile ( ShoppingListActions )
+   ) : ShoppingListState {     
+    switch(action.type){          
+      case ShoppingListActions.ADD_INGREDIENT :         // Call the variable with it's Object 
+          return { 
+            ...state   ,  
+           ingredients: [ ...state.ingredients , action.payload ]         // Update action with action.payload 
+
+           } ;          
+    }
+}
+```
+<br>
+
+* Now ,  we should add the  `new reducer` in the AppModule .
+
+<br>
+
+### app.module.ts ( Modified ) ###
+
+<br>
+
+```javascript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule,  } from '@angular/common/http';
+
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './header/header.component';
+import { AppRoutingModule } from './app-routing.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AlertComponent } from './shared/alert/alert.component';
+import { SharedModule } from './shared/shared-module';
+import { CoreServicesModule } from './core.module';
+import { RecipeModule } from './recipes/recipe.module';
+import { StoreModule } from '@ngrx/store';
+import { shoppingListReducer } from './shopping-list/Store/shopping-list.reducer';   // Old Import 
+import { reducers } from './shopping-list/Shopping-list.main-reducer';        // New import
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    AppRoutingModule,
+    NgbModule,
+    SharedModule,
+    CoreServicesModule,
+    RecipeModule,
+    // StoreModule.forRoot( { ShoopingListStore : shoppingListReducer} )   // Old one
+    StoreModule.forRoot(reducers)    // New One 
+  ],
+
+  bootstrap: [AppComponent]
+  ,
+entryComponents : [ AlertComponent]
+})
+export class AppModule {}
+
+```
+<br>
+
+<img src="images/ngrx-9.png">
+
+<br>
+
+# Selecting State #
+
+<br>
+
+* Upto to the previous step , We have setup a ngrx with a reducer function in AppModule . But we have not used yet .
+
+* We should use this State in the required component ( In my case `Shopping-list.component.ts` )
+
+* The Angular Ngrx allows the specific feature that allows us to inject the Store with our variable of type `Store` that should be imported form `@ngrx/store` ( In the Constructor ) .
+
+<br>
+
+## Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+import { Store } from '@ngrx/store';
+..
+  constructor(
+   ..
+    private store : Store
+    ) { }
+...
+```
+
+<br>
+
+* So we have setedup a Store with the store variable , before using the variable we should specify the type of the Store .
+
+<br>
+
+```javascript
+    private store : Store < ... > // Should be specify type inside it 
+ ```
+<br>
+
+## Specifying the type inside the Store < ... > ##
+
+<br>
+
+* To Specify the type , Actually we should look at the `AppModule` . Our AppModule forRoots to an `reducer` which is an new reducer ts file  .
+
+* Visit that reducer .
+
+* The reducer is returning an `Objcet` with key value pair . 
+
+<br>
+
+### Shopping-list.main-reducer.ts ###
+
+<br>
+
+```javascript
+import { ShoppingListState,  shoppingListReducer } from './Store/shopping-list.reducer';
+...
+export const reducers: ActionReducerMap<AppState, any> = {
+    shoppingList: shoppingListReducer                   // ShoppingList variable that return the ShoppingListReducer function
+};
+...
+```
+<br>
+
+* So , First define that it is an Object `{ ... }`
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+ private store : Store < { } >
+ ...
+```
+<br>
+
+* Then the Object needs exact Key value pairs for it to get correct state . Visit the reducer function get the exact state and provide it inside this Object .
+
+<br>
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+  private store : Store < { shoppingList : { ingredients: Ingredient[] }  } >
+...
+```
+<br>
+
+* We can refer the shopping-list.reducer.ts file to get the exact type .
+
+<br>
+
+## Using the store variable 
+
+<br>
+
+* We have craeted the store variable of Type Store with Specifying it's state .
+
+* Now need to use it .
+
+* Before using the Store , we have called the services from service file and subscribe to it ect in the `ngOnInit()` . 
+
+* But , we can access the `Store` we have created with `slice()` method .
+
+* The `slice()` method gets a string as a argument and that is the variable of the state we have setted up . ( In our case it is `shoppingList `)
+
+<br>
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+ constructor(
+ ...
+    private store : Store < { shoppingList : { ingredients: Ingredient[] }  } >
+    ) { }
+
+  ngOnInit() {
+    this.store.select('shoppingList')
+    ...
+  }
+
+```
+<br>
+
+## Changing the variale type to Observable ##
+
+<br>
+
+* Now the store variable will turns to have `Obsevable` data . 
+
+* We need to change the existing variable which holds the Array format of data to the observable of type we have in the store .
+
+<br>
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+ // ingredients!: Ingredient[];                                 // Old one 
+  ingredients! : Observable< { ingredients: Ingredient[] } >;   //change to Observable
+  ...
+
+  constructor(
+ ...
+    private store : Store < { shoppingList : { ingredients: Ingredient[] }  } >
+    ) { }
+...
+ ngOnInit() {
+    ...
+     this.ingredients = this.store.select('shoppingList')
+     ...
+ }
+
+```
+<br>
+
+* Avoid the old method of accessing the variable . Otherwise , it will show error .
+
+<br>
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+  ngOnInit() {
+    
+     this.ingredients = this.store.select('shoppingList')
+
+    this.lofinService.printlog("Hello from ShoppingList NgOnit ") ;
+
+    // this.ingredients = this.slService.getIngredients();
+    // this.subscription = this.slService.ingredientsChanged
+    //   .subscribe(
+    //     (ingredients: Ingredient[]) => {
+    //       this.ingredients = ingredients;
+    //     }
+    //   );
+  }
+  ...
+```
+
+## Update the HTML with `Asyn` pipe ##
+
+* So we have modified the Array to observable . But the Template will use the `ngFor` to use the old Array .
+
+* It will show error in the template .
+
+* use the Aync pipe and access the Array like below :
+
+<br>
+
+### Shopping-list.component.html ###
+
+<br>
+
+```javascript
+        *ngFor="let ingredient of ( ingredients |async).ingredients; let i = index"     // Adding async pipe 
+```
+
+<br>
+
+* Before Adding async pipe : 
+
+### Shopping-list.component.html ###
+
+<br>
+
+```javascript
+ *ngFor="let ingredient of ingredients; let i = index"    // It will show error now 
+```
+
+<br>
+
+## Add Default condition to switch case in Reducer function ( That should return the initial state )  ##
+
+* We should add the Default condition to the reducer function that returns initial state . Other wise it will show erro while visiting the particular Module we have added the Store .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+
+export function shoppingListReducer( 
+  state : ShoppingListState = initialState,
+   ) : ShoppingListState {     
+    switch(action.type){          
+    ....
+       default : {
+        return  state;             // retrurn initial state in default 
+       }  
+    }
+   }
+...
+```
+<br>
+
+## We have finished setting up only the State not actions . So we should add  actions to the store ##
+
+<br>
+
+# Dispatching Actions #
+
+<br>
+
+* We have setted up a store for the Shopping-list Module .
+
+* We can handle the Store and manipulate them by implementing the Actions by `dispatching` them in the required component .
+
+* In our Example , we are doing actions in `shopping-list-edit` component . ( We add new ingredient and updating it ) .
+
+<br>
+
+### Shopping-list-edit.component.ts ###
+
+<br>
+
+```javascript
+...
+ onSubmit(form: NgForm) {
+
+    const value = form.value;
+    const newIngredient = new Ingredient(value.name, value.amount);
+    if (this.editMode) {
+      this.slService.updateIngredient(this.editedItemIndex, newIngredient);   // Updating ingredient 
+
+    } else {
+      this.slService.addIngredient(newIngredient);    // Adding ingredient  
+
+    }
+    this.editMode = false;
+    form.reset();
+  }
+...
+```
+<br>
+
+* First , Inject the store into this shopping-list-edit.component.ts file .
+
+<br>
+
+### shopping-list-edit.component.ts ###
+
+<br>
+
+```javascript
+import { Store } from '@ngrx/store';
+...
+
+  constructor(
+    ...
+    private store : Store< { shoppingList : {  ingredients: Ingredient[] } } > 
+  )
+  ...
+```
+<br>
+
+* Use the Store with it's variable where we want to perform an action using the `dispatch()` method .
+
+* In our example we want to add ingredient inside the onForm submit :
+
+<br>
+
+```javascript
+...
+  onSubmit(form: NgForm) {
+    ...
+} else {
+      // this.slService.addIngredient(newIngredient);    // Adding ingredient  
+      this.store.dispatch();
+}
+...
+```
+
+<br>
+
+## dispatch() method ##
+
+<br>
+
+* We should pass the Action to the dispatch method as an Object with `new` keyword ( instance )
+
+* To do this , first we should import the Actions to this component with our own Object name by the following import method .
+
+<br>
+
+### Shopping-list-edit.component.ts ###
+
+<br>
+
+```javascript
+import * as ShoppingListActions from '../Store/shopping-list.actions'  //  Import Actions file with your name 
+...
+```
+<br>
+
+* In the Actions file we have the one class `AddIngredient` as below :
+
+<br>
+
+### Shopping-list.Actions.ts ###
 
 
+```javascript
+import { Action } from "@ngrx/store";
+import { Ingredient } from "src/app/shared/ingredient.model";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  payload!: Ingredient;                       // Assign model with variable
+}
+```
+<br>
+
+* So call this within the dispatch() method as below :
+
+<br>
+
+### Shopping-list-edit.component.ts ###
+
+<br>
+
+```javascript
+...
+import * as ShoppingListActions from '../Store/shopping-list.actions'  //  Import Actions file with your name 
+...
+else {
+      // this.slService.addIngredient(newIngredient);    // Adding ingredient  
+      this.store.dispatch( new ShoppingListActions.AddIngredient() );
+}
+...
+```
+
+<br>
+
+* The `Addingredient` class has two properties `type` and `payload` . We do not use type in  the dispatch method .
+
+* But , the `AddIngredient()` inside the dispatch() method needs the `payload` as an argument to implement the Action .
+
+* So , convert the payload property in Actions file as an `constructor` with `public` access to use that in the dispatch() method .
+
+<br>
+
+### shopping-list.Actions.ts ###
+
+<br>
+
+```javascript
+...
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  // payload!: Ingredient;     
+  constructor( public payload : Ingredient ) {}       // make a constructor
+  ...
+}
+```
+<br>
+
+* So now we got access for `payload` , we can pass the argument we want into the AddIngredient() according to our code .
+
+### Shopping-list-edit.component.ts ###
+
+<br>
+
+```javascript
+...
+  onSubmit(form: NgForm) {
+
+    const value = form.value;
+    const newIngredient = new Ingredient(value.name, value.amount);
+    if (this.editMode) {
+      this.slService.updateIngredient(this.editedItemIndex, newIngredient);   // Updating ingredient 
+
+    } else {
+      // this.slService.addIngredient(newIngredient);    // Adding ingredient  
+      this.store.dispatch( new ShoppingListActions.AddIngredient(newIngredient) );    // Adding Ingredient with Store ( New line )
 
 
+    }
+    this.editMode = false;
+    form.reset();
+  }
+...
+```
+
+<br>
+
+# Multiple Actions on Store #
+
+<br>
+
+* We may use more than one Action in the Store . 
+
+* While Updating the actions in the `Actions` file , it will cause an error in the `Reducer` function type declaration .
+
+* To avoid this , we must `Group` the all Actions into single `Type` inside the Actions file .
+
+* While using the Actions in the Reducer , we must follow the chained approach .
+
+<br>
+
+## While working with Multiple Actions ##
+
+### shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+import { Ingredient } from "src/app/shared/ingredient.model";
+
+export const ADD_INGREDIENT = 'ADD_INGREDIENT';
+export const ADD_INGREDIENTS = 'ADD_INGREDIENTS';
+
+export class AddIngredient implements Action {
+  readonly type = ADD_INGREDIENT ;
+  // payload!: Ingredient;     
+  constructor( public payload : Ingredient ) {}       // make a constructor
+}
+
+export class AddIngredients implements Action {
+  readonly type = ADD_INGREDIENTS ;
+  constructor ( public payload : Ingredient[] ) {}
+}
+ 
+export type ShoppingListActions = AddIngredient | AddIngredients ;
+```
+<br>
 
 
+### shopping-list.Reducer.ts ###
+
+<br>
+
+```javascript
+import { Ingredient } from "src/app/shared/ingredient.model";
+import * as ShoppingListActions from "./shopping-list.actions";          // import the whole Actions class with a new Object name .
+
+export interface ShoppingListState{
+  ingredients: Ingredient[];
+}
+
+const initialState : ShoppingListState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+      ]
+}
 
 
+export function shoppingListReducer( 
+  state : ShoppingListState = initialState,
+   action : ShoppingListActions.ShoppingListActions     // Calling with nested approach
+   ) : ShoppingListState {     
+    switch(action.type){          
+      case ShoppingListActions.ADD_INGREDIENT :          // First Action
+          return { 
+            ...state   ,  
+           ingredients: [ ...state.ingredients , action.payload ]         
+         } ;  
 
+         case ShoppingListActions.ADD_INGREDIENTS :      // Second Action
+
+         return {
+          ...state ,
+          ingredients : [ ...state.ingredients , ...action.payload]
+         }
+         
+       default : {
+        return  state;             
+       }  
+    }
+    
+}
+```
+<br>
+
+* We can implement the second Action whereevr we want it . 
+
+* In our example , we have used the `addIngredients()` method inrecipes component as below :
+
+<br>
+
+### recipe.service.ts ###
+
+<br>
+
+```javascript
+...
+import * as ShoppingListActions from '../shopping-list/Store/shopping-list.actions'
+
+...
+
+  constructor(
+    ...
+    private store : Store < { Shoppinglist : {  ingredients: Ingredient[] } }  >
+    ) {}
+
+...
+
+  addIngredientsToShoppingList(ingredients: Ingredient[]) {
+    // this.slService.addIngredients(ingredients);
+  this.store.dispatch( new ShoppingListActions.AddIngredients(ingredients) );
+  }
+...
+
+}
+
+```
+
+<br>
 
 
 

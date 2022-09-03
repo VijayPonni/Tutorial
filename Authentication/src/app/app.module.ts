@@ -11,6 +11,9 @@ import { AlertComponent } from './shared/alert/alert.component';
 import { SharedModule } from './shared/shared-module';
 import { CoreServicesModule } from './core.module';
 import { RecipeModule } from './recipes/recipe.module';
+import { StoreModule } from '@ngrx/store';
+import { shoppingListReducer } from './shopping-list/Store/shopping-list.reducer';   // Old Import 
+import { reducers } from './shopping-list/Shopping-list.main-reducer';        // New import
 
 @NgModule({
   declarations: [
@@ -26,7 +29,9 @@ import { RecipeModule } from './recipes/recipe.module';
     NgbModule,
     SharedModule,
     CoreServicesModule,
-    RecipeModule
+    RecipeModule,
+    // StoreModule.forRoot( { ShoopingListStore : shoppingListReducer} )   // Old one
+    StoreModule.forRoot(reducers)    // New One 
   ],
 
   bootstrap: [AppComponent]
