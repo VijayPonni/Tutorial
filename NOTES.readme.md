@@ -11832,17 +11832,882 @@ import * as ShoppingListActions from '../shopping-list/Store/shopping-list.actio
 
 <br>
 
+# Expanding the State #
+
+<br>
+
+* To update th estate in every component we use in the Module , we should add all wanted properties in the state ( Reduce initial state ) .
+
+* In our application , we added two extra properties that are responsibe for editing the ingredients .
+
+<br>
+
+### Shopping-list.reducer.ts ###
+
+<br>
+
+```javascript
+...
+export interface ShoppingListState{
+  ingredients: Ingredient[];
+  editedIngredient :Ingredient | any;
+  editedIngredientIndex : number;
+}
+
+const initialState : ShoppingListState = {
+
+    ingredients  : [                         
+        new Ingredient('Apples', 5),
+        new Ingredient('Tomatoes', 10),
+    ],
+    editedIngredient : null ,
+    editedIngredientIndex : -1
+  
+}
+export interface AppState {
+  shoppingList: ShoppingListState;          
+};
+...
+```
+
+<br>
+
+* Udate all the places where we use our State as below :
+
+<br>
+
+### Shopping-list.component.ts ###
+
+<br>
+
+```javascript
+...
+import * as fromShoppingList from '../shopping-list/Store/shopping-list.reducer' // Import 
+...
+constructor(
+   ...
+    private store : Store <fromShoppingList.AppState>       // update 
+    ) { } 
+...
+```
+<br>
+
+* We should update in all the other places we injected the Shopping-List .
+
+<br>
+
+# Setting up one Root Store for Application #
+
+<br>
+
+* If we want to add Store for each Modules in our app we should use the AppStore that combines all the stores in the application .
+
+* Have a Seperate Store folder for App to maintain all differennt stores in various Modules .
+
+* That folder should contain Root Reducer form our Application which holds the Other Module States .
+
+* Create a reducer function file  named , `app-reducer.ts`
+
+* First create the interface for all Module States in the Appeducer named  with valuable key name .
+
+<br>
+
+### app.reducer.ts ###
+
+<br>
+
+```javascript
+import * as fromShoppingList from '../shopping-list/Store/shopping-list.reducer'
+import * as fromAuth from '../auth/store/auth.reducer'
+
+export interface AppState {
+   ShoppingList : fromShoppingList.State ,
+   auth : fromAuth.State
+}
+```
+
+<br>
+
+* Craete a new variable of type `ActionReducerMap` as this responsible to handle multiple `store` . 
+
+* This `ActionReducerMap` should be imported from '@ngrx/store' and should have the type with it's State `<>` .
+
+* As we have AppState as our State for the entire Application . we should pass it as the type inside `<>`.
+
+* The new variable should hold the value the States we using with their imports .
+
+<br>
+
+### app-reducer.ts ###
+
+<br>
+
+```javascript
+import * as fromShoppingList from '../shopping-list/Store/shopping-list.reducer'
+import * as fromAuth from '../auth/store/auth.reducer'
+import { ActionReducerMap } from '@ngrx/store'
+
+export interface AppState {
+   ShoppingList : fromShoppingList.State ,
+   auth : fromAuth.State
+}
+
+const appReducer : ActionReducerMap<AppState , any> = {
+    ShoppingList : fromShoppingList.shoppingListReducer,
+    auth : fromAuth.AuthReducer
+}
+```
+
+<br>
+
+* Update the existance of `AppReducer` in `AppModule` .
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+import * as fromAppReducer from '../app/Store/app-reducer'
+...
+    StoreModule.forRoot(fromAppReducer.appReducer)    
+...
+```
+
+<br>
+
+# Important Notes on Actions #
+
+<br>
+
+## Always use the default case for Reducer functions that return it's state ##
+
+<br>
+
+* The `dispatch()` method we call to access the `Store` will always reach all the `Reducers` under the Store .
+
+* So we must have the `default case that returs the state of it's reducer` .  in every reducers .
+
+* Otherwise it will show error in other parts os the Application where we use the Store with dispatch() method .
+
+## Try to provide unique value for each identifiers in the Actions ##
+
+<br>
+
+* As the Store works with entire Application , If the value of identifier of one Module is similar to any other identifier in another Module , then it will class .
+
+* So always try to use specific names for identifiers as below :
+
+<br>
+
+### shopping-list.actions.ts ###
+
+<br>
+
+```javascript
+...
+export const ADD_INGREDIENT = '[Shopping List] Add Ingredient';
+export const ADD_INGREDIENTS = '[Shopping List] Add Ingredients';
+export const UPDATE_INGREDIENT = '[Shopping List] Update Ingredient';
+export const DELETE_INGREDIENT = '[Shopping List] Delete Ingredient' ;
+
+export const START_EDIT = '[ShoppingList] StartEdit';
+export const STOP_EDIT ='[ShoppingList] StopEdit';
+...
+```
+<br>
+
+### auth.actions.ts ###
+
+<br>
+
+```javascript
+...
+export const LOGIN = '[Auth] Login';
+export const LOGOUT = '[Auth] Logout';
+...
+```
+<br>
+
+# Exploring ngRx side Effects #
+
+<br>
+
+* ngRx state or Store does not care when we use immediate state update . But while we use the Asynchrnous data like `HttpRequests` , it will cause some effects in our Application . We will see one by one .
+
+* We can rectify the effects by `package` named `@ngrs/effects` 
+
+* Install it using below command in application :
+
+<br>
+
+```javascript
+npm i--save @ngrx/effects
+```
+<br>
+
+* Re run the Application by `ng serve ` again .
+
+<img src="images/ngrx-11.png">
+
+<br>
+
+# Definig the First Effect #
+
+<br>
+
+* Let us take a Auth Module as an example .
+
+* Create a file in the store named related to effects .
+
+* Inject a variable with `private` variable of type `Actions` which is imported from `@ngrx/effects`  
+
+* That is `NOT Action IT IS Actions`
+
+<br>
+
+### Auth.effects.ts ###
+
+<br>
+
+```javascript
+import { Actions } from '@ngrx/effects'
+
+export class AuthEffects {
+    constructor( private actions$ : Actions){}
+}
+```
+
+<br>
+
+* Name a effect as property with own name that is relatable to effect you are going to handle .
+
+* Then provide the value for the variable using the injection variable  from `Actions` with the `pipe()` method .
+
+<br>
+
+### Auth.effects.ts ###
+
+<br>
+
+```javascript
+import { Actions } from '@ngrx/effects'
+
+export class AuthEffects {
+    autoLogin = this.actions$.pipe()
+    
+    constructor( private actions$ : Actions){}
+}
+```
+
+<br>
+
+## ofType() Operator ##
+
+* use `ofType()` operator which is part of `@ngrx/effects` to identify which type we want to use the filter in the actions .
 
 
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+import { Actions , ofType} from '@ngrx/effects'
+
+export class AuthEffects {
+    autoLogin = this.actions$.pipe(
+        ofType()
+    )
+
+    constructor( private actions$ : Actions){}
+}
+```
+
+<br>
+
+* We can use the Actions we have provided in the Actions `auth.actions.ts`
+
+* The Actions we have `provided in the ofType()` will only get apply with effect .
+
+* To use this , Create a new Action in the `auth.action.ts`
+
+<br>
+
+### auth.actions.ts ###
+
+<br>
+
+```javascript
+...
+export const LOGIN_START = '[Auth] Login Start';
+...
+```
+
+<br>
+
+* Access this Action in the action.effects.ts using the `ofType()` as below :
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+import { Actions , ofType} from '@ngrx/effects';
+import * as fromAuthActions from '../store/auth.actions' 
+
+export class AuthEffects {
+    autoLogin = this.actions$.pipe(
+        ofType( fromAuthActions.LOGIN_START)
+    )
+
+    constructor( private actions$ : Actions){}
+}
+```
+<br>
+
+# Effects and Error Handling #
+
+<br>
+
+* Create a Action for the new Identifier in the `auth.actions.ts` with it's necessary payload . As we need to login our payload is an object with the properties of emial and password .
+
+<br>
+
+### auth.actions.ts ###
+
+<br>
+
+```javascript
+...
+
+export class LoginStart implements Action {
+ readonly type = LOGIN_START
+ constructor( public payload : { email : string , password : string }){}
+}
+...
+```
+
+<br>
+
+## Uing SwitchMap() method to handle http request ##
+
+<br>
+
+* After filteriing the Specifuc Action with the ofType() operator  we need to acces to the Action using the SwitchMap method .
+ 
+* The switchMap() allows us to take new Observable which takes the another Observable as data .
+
+* Pass the Action as an argument to the SwitchMap method which we want to get access .
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+...
+switchMap( (authData : fromAuthActions.LoginStart) => {} )
+...
+```
+<br>
+
+* Copy the login method feom the Service to this SwitchMap .
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+import { Actions , ofType} from '@ngrx/effects';
+import { switchMap } from 'rxjs';
+import * as fromAuthActions from '../store/auth.actions' 
+
+export class AuthEffects {
+    autoLogin = this.actions$.pipe(
+        ofType( fromAuthActions.LOGIN_START),
+        switchMap( (authData : fromAuthActions.LoginStart) => {
+            return this.http.post<AuthResponseData>(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+                {
+                    email : email,
+                    password : password,
+                    returnSecureToken : true
+                }
+                )
+        } )
+    )
+
+    constructor( private actions$ : Actions){}
+}
+```
+<br>
+
+* This leads to some errors as we don't have httpClient and other features .
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+import { HttpClient } from '@angular/common/http';
+import { Actions , ofType} from '@ngrx/effects';
+import { switchMap } from 'rxjs';
+import * as fromAuthActions from '../store/auth.actions' 
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+
+export class AuthEffects {
+    autoLogin = this.actions$.pipe(
+        ofType( fromAuthActions.LOGIN_START),
+        switchMap( (authData : fromAuthActions.LoginStart) => {
+            return this.http.post<AuthResponseData>(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+                {
+                    email :authData.payload.email,
+                    password : authData.payload.password,
+                    returnSecureToken : true
+                }
+                )
+        } )
+    )
+
+    constructor( private actions$ : Actions , private http : HttpClient){}
+}
+```
+
+<br>
 
 
+* `@Effect()` decorator to the class to implement the the Effects in this class . Import the decorator from the `@ngrx/effects`
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+...
+import { Effect } from '@ngrx/effects'
+...
+export class AuthEffects {
+    @Effect()
+    }
+...
+```
+
+<br>
+
+* Handle the Error using the catchError() method , by addng the innerPipe to the SwichMap() as below :
+
+<br>
+
+### auth.effect.ts ###
+
+```javascript
+import { HttpClient } from '@angular/common/http';
+import { Actions , ofType} from '@ngrx/effects';
+import { catchError, map, of, switchMap } from 'rxjs';
+import * as fromAuthActions from '../store/auth.actions' 
+import { Effect } from '@ngrx/effects'
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+
+export class AuthEffects {
+    @Effect()
+    autoLogin = this.actions$.pipe(
+        ofType( fromAuthActions.LOGIN_START),
+        switchMap( (authData : fromAuthActions.LoginStart) => {
+            return this.http.post<AuthResponseData>(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+                {
+                    email :authData.payload.email,
+                    password : authData.payload.password,
+                    returnSecureToken : true
+                }
+                )
+                .pipe(
+                  map(resData => {
+                        return of(new AuthActions.Login);          // creates new Observable 
+                    }) ,
+                    catchError(
+                        error => {
+                            // ..error handling
+                            return of()   // Creates new Observable without an error 
+                        }
+                    ) 
+                )
+        } )
+    )
+
+    constructor( private actions$ : Actions , private http : HttpClient){}
+}
+```
+
+<br>
+
+* Expand the method as we did in service file :
+
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+...
+   )
+                .pipe(
+                    map(resData => {
+                        const expirationDate = new Date( new Date().getTime() + +resData.expiresIn * 1000)
+                        return of(new AuthActions.login({
+                            email: resData.email,
+                         userId:resData.localId,
+                         token: resData.idToken,
+                         expirationDate:expirationDate
+                        }));          // creates new Observable
+                    }),
+                    catchError(
+                        error => {
+                            // ..error handling
+                            of()   // Creates new Observable without an error 
+                        }
+                    ) 
+                )
+...
+```
+
+<br>
 
 
+* Add `@Injectable()` to the class imported from `@Angular/core`
+
+### auth.effect.ts ###
+
+<br>
+
+```javascript
+import { Injectable } from '@angular/core';
+...
+@Injectable()
+export class AuthEffects { ..}
+...
+```
+
+<br>
+
+* Register the `EffectsModule` In the AppMOdule as an Array with elements what effects we have used so far .
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+...
+import { AuthEffects } from './auth/store/auth.effects';
+...
+    EffectsModule.forRoot([AuthEffects])
+...
+```
+<br>
+
+* Dispatch the Login method where we want to login ( auth.component.ts )
+
+<br>
+
+### auth.component.ts ###
+
+<br>
+
+```javascript
+...
+ if(this.isLoggingMode){
+      // authObs = this.auth.login(email,password);
+      this.store.dispatch(new AuthActions.LoginStart( { email:email , password:password } ))
+    }
+...
+```
+
+<br>
+
+### We should need to change the Subscription according to the Effects ###
+
+<br>
+
+### auth.component.ts ###
+
+<br>
+
+```javascript
+import { Component, ComponentFactoryResolver, OnDestroy, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { AuthResponseData, AuthService } from './auth.service';
+import { AlertComponent } from '../shared/alert/alert.component';
+import { PlaceholderDirective } from '../shared/placeholder/placeholder.directive';
+import { Store } from '@ngrx/store';
+import * as fromApp from '../Store/app-reducer';
+import * as AuthActions from '../auth/store/auth.actions';
+import { OnInit } from '@angular/core';
+
+@Component({
+  selector: 'app-auth',
+  templateUrl: './auth.component.html'
+})
+export class AuthComponent implements OnInit ,OnDestroy{
+
+  constructor(
+    private auth : AuthService ,
+    private route : Router,
+    private componentFactoryResolver : ComponentFactoryResolver ,
+    private store : Store<fromApp.AppState>
+    ){}
+
+    @ViewChild(PlaceholderDirective, { static: false }) alertHost!: PlaceholderDirective;
+
+    private closeSub!: Subscription; 
 
 
+  isLoggingMode = true ;
+  isLoading = false ;
+  error :any = '';
+  
+  
+ngOnInit(){
+  this.store.select('auth').subscribe( authState => {
+    this.isLoading = authState.loading;
+    this.error = authState.authError;
+   
+  }
+    )
+}
+
+  onSwitchMode(){
+   this.isLoggingMode = ! this.isLoggingMode ;
+  } 
+
+  onHandleError(){
+    this.error=null;
+  }
+
+  onSubmit(form : NgForm){
+    if(!form.valid){
+      return;
+    }
+    const email = form.value.email;
+    const password = form.value.password;
+    this.isLoading = true ;
+
+    let authObs : Observable<AuthResponseData>
+
+    if(this.isLoggingMode){
+      // authObs = this.auth.login(email,password);
+      this.store.dispatch(new AuthActions.LoginStart( { email:email , password:password } ))
+    }
+    else{
+      authObs = this.auth.signUp(email,password)
+    }
+
+   
+
+  //   authObs.subscribe(            
+  //   resData => {
+  //     this.isLoading = false;
+  //     console.log(resData);
+  //      this.route.navigate(['recipes'])
+  //     },
+  //     errorMessage => {
+  //     this.isLoading = false;
+  //     console.log(errorMessage);
+  //     this.showErrorAlert(errorMessage);
+  //     this.error = errorMessage;
+  //   }
+  // );
+
+form.reset();
+  }
+
+  private showErrorAlert(message:string){
+    const alertCmpFactory =  this.componentFactoryResolver.resolveComponentFactory(AlertComponent)
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+   const componentRef =  hostViewContainerRef.createComponent(alertCmpFactory);
+     componentRef.instance.message = message;
+
+     this.closeSub = componentRef.instance.close.subscribe( () => {
+      this.closeSub.unsubscribe();
+      hostViewContainerRef.clear();
+
+     } );
+ }
+
+ ngOnDestroy(): void {
+  if(this.closeSub){
+   this.closeSub.unsubscribe();
+   }
+ }
+
+} 
+
+```
+<br>
+
+### auth.actions.ts ###
+
+<br>
+
+```javascript
+import { Action } from "@ngrx/store";
+
+export const LOGIN_START = '[Auth] Login Start';
+export const LOGIN = '[Auth] Login';
+export const LOGOUT = '[Auth] Logout';
+export const LOGIN_FAIL = '[Auth] Login Fail'
+
+export class login implements Action{
+    readonly type = LOGIN
+    constructor(public payload : {
+        email : string , userId : string , token : string , expirationDate : Date 
+    } ){}
+}
+
+export class logout implements Action {
+    readonly type = LOGOUT
+}
+
+export class LoginStart implements Action {
+ readonly type = LOGIN_START
+ constructor( public payload : { email : string , password : string }){}
+}
+
+export class LoginFail implements Action {
+    readonly type = LOGIN_FAIL
+    constructor( public payload : string ){}
+}
+
+export type AuthActions = login | logout | LoginStart | LoginFail;
+```
+<br>
 
 
+# Finishing the Login Effect with Routing and Error Handling  #
 
+<br>
+
+### auth.effects.ts ###
+
+<br>
+
+```javascript
+import { HttpClient } from '@angular/common/http';
+import { Actions , ofType} from '@ngrx/effects';
+import { catchError, map, of, switchMap, tap, throwError } from 'rxjs';
+import * as AuthActions from '../store/auth.actions' 
+import { Effect } from '@ngrx/effects'
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+
+export interface AuthResponseData{
+    idToken : string,
+    email : string ,
+    refreshToken : string ,
+    expiresIn : string ,
+    localId : string,
+    registered? : boolean
+}
+
+
+@Injectable()
+export class AuthEffects {
+    @Effect()
+    autoLogin = this.actions$.pipe(
+        ofType( AuthActions.LOGIN_START),
+        switchMap( (authData : AuthActions.LoginStart) => {
+            return this.http.post<AuthResponseData>(
+                'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+                {
+                    email :authData.payload.email,
+                    password : authData.payload.password,
+                    returnSecureToken : true
+                }
+                )
+                .pipe(
+                    map(resData => {
+                        const expirationDate = new Date( new Date().getTime() + +resData.expiresIn * 1000)
+                        return new AuthActions.login({
+                            email: resData.email,
+                         userId:resData.localId,
+                         token: resData.idToken,
+                         expirationDate:expirationDate
+                        });          // creates new Observable
+                    }),
+                    catchError(
+                        errorRes => {
+                            console.log(errorRes);
+                            let errorMessage = " An unknown error occured ! "
+                            if( !errorRes.error || !errorRes.error.error){
+                                return of(new AuthActions.LoginFail(errorMessage))
+                            }
+                            switch(errorRes.error.error.message){
+                
+                                case 'EMAIL_EXISTS' :
+                                errorMessage = ' The email already exists ! '
+                                break;
+                
+                                case 'EMAIL_NOT_FOUND' :
+                                errorMessage = ' The email does not exists ! '
+                                break;
+                
+                                case 'INVALID_PASSWORD' :
+                                errorMessage = ' The Paaword is wrong ! '
+                                break;
+                
+                
+                              }
+                            return of(new AuthActions.LoginFail(errorMessage))   // Creates new Observable without an error 
+                        }
+                    ) 
+                )
+        } )
+    )
+
+    @Effect({ dispatch :false})
+    authSuccess = this.actions$.pipe( ofType(AuthActions.LOGIN) , tap( () => {
+       this.router.navigate(['/']);
+    }))
+
+    constructor( private actions$ : Actions , private http : HttpClient , private router: Router){}
+}
+```
+<br>
 
 
 

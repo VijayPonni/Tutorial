@@ -12,9 +12,9 @@ import { SharedModule } from './shared/shared-module';
 import { CoreServicesModule } from './core.module';
 import { RecipeModule } from './recipes/recipe.module';
 import { StoreModule } from '@ngrx/store';
-import { shoppingListReducer } from './shopping-list/Store/shopping-list.reducer';   // Old Import 
-import { reducers } from './shopping-list/Shopping-list.main-reducer';        // New import
-
+import * as fromAppReducer from '../app/Store/app-reducer'
+import { EffectsModule } from '@ngrx/effects'
+import { AuthEffects } from './auth/store/auth.effects';
 @NgModule({
   declarations: [
     AppComponent,
@@ -30,8 +30,8 @@ import { reducers } from './shopping-list/Shopping-list.main-reducer';        //
     SharedModule,
     CoreServicesModule,
     RecipeModule,
-    // StoreModule.forRoot( { ShoopingListStore : shoppingListReducer} )   // Old one
-    StoreModule.forRoot(reducers)    // New One 
+    StoreModule.forRoot(fromAppReducer.appReducer)    ,
+    EffectsModule.forRoot([AuthEffects])
   ],
 
   bootstrap: [AppComponent]
