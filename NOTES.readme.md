@@ -12710,7 +12710,159 @@ export class AuthEffects {
 <br>
 
 
+# Using the Store DevTools  #
 
+<br>
 
+* Visit the This git page : <a href="https://github.com/zalmoxisus/redux-devtools-extension"> CLICK ME ! </a>
 
+<br>
+
+<img src="images/ngrx-12.png">
+
+<br>
+
+* Visit the the Extension pages according to our browsers given in the Git Documentation .
+
+<br>
+
+<img src="images/ngrx-13.png">
+
+<br>
+
+* Install the Store Dev tools in the application using the below command :
+
+<br>
+
+```javascript
+npm install --save-dev @ngrx/store-devtools
+```
+
+* Rerun the Application using `ng serve` .
+
+<br>
+
+* Import `StoreDevToolsModule` in the AppModule imports sections from `@ngrx/store-devtools`
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+...
+import { StoreDevtoolsModule} from '@ngrx/store-devtools'
+...
+  imports: [
+   StoreDevtoolsModule
+  ],
+...
+```
+
+<br>
+
+* Call `instrument` method  with Object .
+
+<br>
+
+### ###
+
+```javascript
+...
+StoreDevtoolsModule.instrument({})
+...
+```
+
+<br>
+
+* Add a `logonly` configuration to the method with `environment` variable from `evironment folder environment file not prod file `  and call the `production` property .
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+...
+    StoreDevtoolsModule.instrument({ logOnly : environment.production})
+...
+```
+<br>
+
+* We can see the `Redux` as a devtool . 
+
+<img src="images/ngrx-14.png">
+
+<br>
+
+* With that we can do monitor our State activities :
+
+<br>
+
+<img src="images/ngrx-15.png">
+
+<br>
+
+# The Router Store #
+
+<br>
+
+* This package will dispatch some actions based on routing wit Store and will suggest some methos while handling Store , reducer and etc .
+
+* Install the Router Store package in your application with the help of below command :
+
+<br>
+
+```javascript
+npm i --save @ngrx/router-store
+```
+
+<br>
+
+* Re run the Application again using `ng serve`
+
+<br>
+
+* Add this `StoreRouterConnectingMOdule` in the imports of the AppMOdule  imported from this Module .
+
+<br>
+
+### app.module.ts ###
+
+<br>
+
+```javascript
+import { environment } from 'src/environments/environment';
+...
+
+  imports: [
+...
+    StoreRouterConnectingModule.forRoot()
+  ]
+...
+```
+
+<br>
+
+<img src="images/ngrx-16.png">
+
+<br>
+
+* We can see the Deatailed information about the router in the Store . We can use this in complex application to manage the store .
+
+<br>
+
+### To learn More about ngrx through practice visit the below link : ###
+
+<br>
+
+<a href="https://ngrx.io/guide/store"> Click Me ! </a>
+
+<br>
+
+<a href="https://github.com/ngrx/platform/tree/master/projects"> Click me ! </a>
+
+<br>
 

@@ -3,7 +3,7 @@ export class User {
         public email : string,
         public id : string ,
         private _token : string ,              // TO make developr use the token with getter .
-        private _tokenExpirationDate : Date 
+        private _tokenExpirationDate : Date ,
     ){}
 
 

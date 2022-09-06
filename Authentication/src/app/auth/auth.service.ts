@@ -7,7 +7,7 @@ import { User } from "./user.model";
 import { Store } from "@ngrx/store";
 import * as fromApp from '../Store/app-reducer'
 import { Action } from "rxjs/internal/scheduler/Action";
-import * as fromAuthActions from '../auth/store/auth.actions'
+import * as AuthActions from '../auth/store/auth.actions'
 import { environment } from "src/environments/environment";
 
 export interface AuthResponseData{
@@ -33,135 +33,144 @@ export class AuthService {
     // user = new BehaviorSubject<User | null >(null);         // use the BEhaviourSubject with initial value null
     private tokenexpirationTimer : any ;
 
-    signUp(email : string , password : string){
+    // signUp(email : string , password : string){
 
-       return this.http.post<AuthResponseData>( 
-            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
-            {
-                email : email,
-                password : password,
-                returnSecureToken : true
-            }
-         ).pipe( 
-            catchError( this.errorHandler),
-            tap( resData => {
-                this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn)
-            })
-             )
+    //    return this.http.post<AuthResponseData>( 
+    //         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',      // complete url
+    //         {
+    //             email : email,
+    //             password : password,
+    //             returnSecureToken : true
+    //         }
+    //      )
+    //      .pipe( 
+    //         catchError( this.errorHandler),
+    //         tap( resData => {
+    //             this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn)
+    //         })
+    //          )
          
-    }
+    // }
 
 
-    login(email : string , password : string ){
-       return this.http.post<AuthResponseData>(
-            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
-            {
-                email : email,
-                password : password,
-                returnSecureToken : true
-            }
-            )
-            .pipe( 
-                catchError( this.errorHandler) ,
-                tap (resData => {
-                    this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn );
-                } ) 
+    // login(email : string , password : string ){
+    //    return this.http.post<AuthResponseData>(
+    //         'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBP02M32UK1J-7S5k81wJ47eitIwYFltzQ',
+    //         {
+    //             email : email,
+    //             password : password,
+    //             returnSecureToken : true
+    //         }
+    //         )
+    //         .pipe( 
+    //             catchError( this.errorHandler) ,
+    //             tap (resData => {
+    //                 this.handleAuthentication(resData.email , resData.localId , resData.idToken ,+resData.expiresIn );
+    //             } ) 
 
                 
-                )
+    //             )
 
-    }
+    // }
 
     logOut(){
         // this.user.next(null);
         
-        this.store.dispatch(new fromAuthActions.logout());
+        this.store.dispatch(new AuthActions.AuthenticateFail());
 
-        this.route.navigate(['/auth']);
-        localStorage.removeItem('userData');   // Clear local Storage 
+        // this.route.navigate(['/auth']);
+        // localStorage.removeItem('userData');   
 
-        if(this.tokenexpirationTimer){
-            clearTimeout(this.tokenexpirationTimer);
-        }
-        this.tokenexpirationTimer = null ;
+        // if(this.tokenexpirationTimer){
+        //     clearTimeout(this.tokenexpirationTimer);
+        // }
+        // this.tokenexpirationTimer = null ;
     }
     
-    autoLogout(expirationDuration: number){
+    setLogoutTimer(expirationDuration: number){
       this.tokenexpirationTimer =  setTimeout( () => {        
-        this.logOut();
+        // this.logOut();
+        this.store.dispatch(new AuthActions.AuthenticateFail)
       } , expirationDuration) 
     }
 
-    private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
-        const expirationdate = new Date( new Date().getTime() + expiresIn * 1000);
-        const user = new User(email , userId , token , expirationdate)  // Pass the values to the uder model
-        // this.user.next(user);       // emit the subject with user 
-        this.store.dispatch( new fromAuthActions.login({
-            email :email,
-            userId : userId,
-            token:token,
-            expirationDate:expirationdate
-        }))
-        this.autoLogout ( expiresIn * 1000);          // call Autologout with the expires time 
-        localStorage.setItem( 'userData' , JSON.stringify(user)  )          // Store the user in local storage to implement auto-login
+    clearLogoutTimer(){
+        if(this.tokenexpirationTimer){
+            clearTimeout(this.tokenexpirationTimer);
+            this.tokenexpirationTimer=null;
+        }
     }
 
-    autoLogin(){
-        console.log("Auto LogIn");
+    // private handleAuthentication( email : string ,  userId : string , token : string , expiresIn : number ){
+    //     const expirationdate = new Date( new Date().getTime() + expiresIn * 1000);
+    //     const user = new User(email , userId , token , expirationdate)  // Pass the values to the uder model
+    //     // this.user.next(user);       // emit the subject with user 
+    //     this.store.dispatch( new AuthActions.AuthenticateSuccess({
+    //         email :email,
+    //         userId : userId,
+    //         token:token,
+    //         expirationDate:expirationdate
+    //     }))
+    //     this.autoLogout ( expiresIn * 1000);          // call Autologout with the expires time 
+    //     localStorage.setItem( 'userData' , JSON.stringify(user)  )          // Store the user in local storage to implement auto-login
+    // }
 
-         const  userData : {
-            email : string ,
-            id : string ,
-            _token : string ,
-            _tokenExpirationData : string 
-        } 
+    // autoLogin(){
+    //     console.log("Auto LogIn");
 
-         = JSON.parse(localStorage.getItem('userData') as string);
+    //      const  userData : {
+    //         email : string ,
+    //         id : string ,
+    //         _token : string ,
+    //         _tokenExpirationData : string 
+    //     } 
 
-        if(!userData){
-            return ;
-        }   
+    //      = JSON.parse(localStorage.getItem('userData') as string);
+
+    //     if(!userData){
+    //         return ;
+    //     }   
      
-        const loadedUser = new User(userData.email , userData.id , userData._token , new Date(userData._tokenExpirationData))
+    //     const loadedUser = new User(userData.email , userData.id , userData._token , new Date(userData._tokenExpirationData))
 
-        if(loadedUser.token){
-            // this.user.next(loadedUser);
-            this.store.dispatch(new fromAuthActions.login( {
-                email : loadedUser.email,
-                userId : loadedUser.id,
-                token : loadedUser.token,
-                expirationDate : new Date(userData._tokenExpirationData)
+    //     if(loadedUser.token){
+    //         // this.user.next(loadedUser);
+    //         this.store.dispatch(new fromAuthActions.AuthenticateSuccess( {
+    //             email : loadedUser.email,
+    //             userId : loadedUser.id,
+    //             token : loadedUser.token,
+    //             expirationDate : new Date(userData._tokenExpirationData)
 
-            }))
-            const expirationDuration = new Date(userData._tokenExpirationData).getTime() -
-            new Date().getTime();
-            this.autoLogout(expirationDuration);
-        }
-    }
+    //         }))
+    //         const expirationDuration = new Date(userData._tokenExpirationData).getTime() -
+    //         new Date().getTime();
+    //         this.autoLogout(expirationDuration);
+    //     }
+    // }
     
-    private errorHandler(errorRes : HttpErrorResponse){
-            console.log(errorRes);
-            let errorMessage = " An unknown error occured ! "
-            if( !errorRes.error || !errorRes.error.error){
-                return throwError(errorMessage)
-            }
-            switch(errorRes.error.error.message){
+    // private errorHandler(errorRes : HttpErrorResponse){
+    //         console.log(errorRes);
+    //         let errorMessage = " An unknown error occured ! "
+    //         if( !errorRes.error || !errorRes.error.error){
+    //             return throwError(errorMessage)
+    //         }
+    //         switch(errorRes.error.error.message){
 
-                case 'EMAIL_EXISTS' :
-                errorMessage = ' The email already exists ! '
-                break;
+    //             case 'EMAIL_EXISTS' :
+    //             errorMessage = ' The email already exists ! '
+    //             break;
 
-                case 'EMAIL_NOT_FOUND' :
-                errorMessage = ' The email does not exists ! '
-                break;
+    //             case 'EMAIL_NOT_FOUND' :
+    //             errorMessage = ' The email does not exists ! '
+    //             break;
 
-                case 'INVALID_PASSWORD' :
-                errorMessage = ' The Paaword is wrong ! '
-                break;
+    //             case 'INVALID_PASSWORD' :
+    //             errorMessage = ' The Paaword is wrong ! '
+    //             break;
 
 
-              }
-              return throwError(errorMessage)
-        }
+    //           }
+    //           return throwError(errorMessage)
+    //     }
 
 }
