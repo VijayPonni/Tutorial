@@ -12866,3 +12866,99 @@ import { environment } from 'src/environments/environment';
 
 <br>
 
+# Angular Universal ( Bonus )  #
+
+<br>
+
+* Angular universal allows us to pre-render our code from the server .
+
+## Common problems in Angular Aplicatio ##
+
+<br>
+
+* As the Angular application only contains the scripts except App-root to make the Application Single Paged , Sometimes it will take more time to download the script files if the user in on slower network connection.
+
+* The Search engines are varies in various platforms . So it slows the speed of loading of the Application .
+
+## Overcome Using Angular universal ##
+
+* We can overcome these problems by setting the initial loading to the server .
+
+* So the server implements the initial loading with HTML and script and further steps will be carried by the browser .
+
+# Adding Angular Universal #
+
+<br>
+
+## 1 ) : Run the command ##
+
+<br>
+
+```javascript
+ng add @nguniversal/express-engine --clientProject <Use identifier name in your projcet>
+```
+
+<br>
+
+### Note : we can get our identifier name in the `angular.json` as below : ###
+
+<br>
+
+<img src="images/ang-uni-1.png">
+
+<br>
+
+* So i need to run the command as below :
+
+<br>
+
+```javascript
+ng add @nguniversal/express-engine --clientProject Authentication
+```
+
+<br>
+
+<img src="images/ang-uni-2.png">
+
+<br>
+
+## Create ApPServerModule ##
+
+<br>
+
+### app.server.module.ts ###
+
+<br>
+
+```javascript
+import { AppModule } from "./app.module";
+import { AppComponent } from "./app.component";
+import { ModuleMapLoaderModule } from '@nguniversal/module-map-ngfactory-loader';
+import { NgModule } from "@angular/core";
+import { ServerModule } from '@angular/platform-server';
+
+@NgModule({
+    imports : [
+        AppModule,
+        ServerModule,
+        ModuleMapLoaderModule,
+      ],
+      bootstrap:[AppComponent],
+})
+
+export class AppServerModule {}
+```
+<br>
+
+
+* But , in the above module , ther will not be installed all files . 
+
+* To install ng-factory run the below command in terminal :
+
+<br>
+
+```javascript
+npm install --save @nguniversal/module-map-ngfactory-loader
+```
+
+<br>
