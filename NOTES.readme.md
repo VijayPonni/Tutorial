@@ -12962,3 +12962,288 @@ npm install --save @nguniversal/module-map-ngfactory-loader
 ```
 
 <br>
+
+* To be continued this Angular -Universal section 
+
+# Angular elements #
+
+<br>
+
+* Consider that we need to create an angular component through the typescript using the elements .
+
+<br>
+
+```javascript
+
+<div [innerHTML]="content"></div>
+```
+
+<br>
+
+```javascript
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'Angular-elements';
+  content : any = null;
+
+  constructor(){
+    setTimeout(()=> {
+      this.content = "<app-alert message='render dynamicallay'><app-alert>"
+    },1000)
+  }
+}
+
+```
+
+<br>
+
+<br>
+
+### alert.component.ts ###
+
+```javascript
+import { Component, Input } from "@angular/core";
+
+@Component({
+    selector:'app-alert',
+    template:'<div> This is the Alert {{ message }} </div>',
+    styles:[
+        `div{
+            border:1px solid red;
+            background-color:blue;
+            padding:10px;
+            font-family:sans-serif;
+        }
+        `
+    ]
+})
+
+export class AlertComponent {
+@Input() message !: string;
+}
+```
+
+<br>
+
+
+* But , it will not work . To make this work , we need to install the elements package as below :
+
+<br>
+
+```javascript
+npm install --save @angular/elements
+```
+<br>
+
+* So update the app.component.ts as below :
+
+<br>
+
+```javascript
+import { Component, Injector } from '@angular/core';
+import { AlertComponent } from './alert.componet';
+import { createCustomElement } from '@angular/elements'
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'Angular-elements';
+  content : any = null;
+
+  constructor(injector:Injector){
+    const AlertElement = createCustomElement(AlertComponent , { injector: injector});
+    customElements.define('my-alert' , AlertElement)
+    setTimeout(()=> {
+      this.content = "<my-alert message='render dynamicallay'><my-alert>"
+    },1000)
+  }
+}
+
+```
+<br>
+
+* Add this to entry component :
+
+<br>
+
+```javascript
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AlertComponent } from './alert.componet';
+
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    AlertComponent
+  ],
+  imports: [
+    BrowserModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  entryComponents:[AlertComponent]
+})
+export class AppModule { }
+
+```
+
+<br>
+
+* Import `DomSanitizer` and use it with the `byPassSecurityTrustedByHtml` to the specified component that we need to create as below :
+
+<br>
+
+```javascript
+import { Component, Injector } from '@angular/core';
+import { AlertComponent } from './alert.componet';
+import { createCustomElement } from '@angular/elements'
+import { DomSanitizer } from '@angular/platform-browser';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'Angular-elements';
+  content : any = null;
+
+  constructor(injector:Injector , domsanitizer : DomSanitizer){
+    const AlertElement = createCustomElement(AlertComponent , { injector: injector});
+    customElements.define('my-alert' , AlertElement)
+    setTimeout(()=> {
+      this.content = domsanitizer.bypassSecurityTrustHtml("<my-alert message='render dynamicallay'><my-alert>");
+    },1000)
+  }
+}
+
+```
+
+<br>
+
+* So now we are able to create elements dynamically .
+
+<br>
+
+# Type Script #
+
+<br>
+
+* Typescript is an enhanced version of javascript with the `Type specification` .
+
+* Type script forces us to specify the types for the varables , classes or other featuers we using in our code .
+
+* It avoids errors than javascript .
+
+* It also helps us to create classes , interfaces by keywords simply .
+
+<br>
+
+## Types ##
+
+<br>
+
+
+* string --> "..."
+
+* number --> 0,,32,...
+
+* boolean --> true , false .
+
+* Array --> Array<string>  { Generic type } .
+
+* any --> Supports all types { Mostly try to avoid it } .
+
+* void --> it is a type of a function that `does not return anything` .
+
+* enums --> Set of numeric values .
+
+<br>
+
+## Classes ##
+
+<br>
+
+* Class is the blueprint to create the Object later .
+
+* We can create the class with `class` keyword and `name of the class` .
+
+* This class may have many properties , functions inside it .
+
+* So we can use this class with the `new` keyword .
+
+* `Constructor` is the primary function that gets the argument for the class and it is the first ine which is executed while a class is get called or used .
+
+* Private keyword will not allow the properties and functions in outer class .
+
+<br>
+
+```javascript
+
+class vijay {
+
+  constrcutor(){}
+
+    public name : string = 'jewewe';
+
+    ...
+
+    add(){
+
+    }
+}
+
+```
+
+<br>
+
+```javascript
+let obj = new Object();
+obj.add();
+```
+
+<br>
+
+## Interface ##
+
+<br>
+
+* Interface is used to force us to have the specific format of an interface we have created .
+
+```javascript
+interface User {
+  name : string ;
+  age : number;
+  gender ? : string ;  // The ' ? ' symbol implies optional 
+}
+ 
+let variable : User ;  
+```
+* Now , whereever we use the variable  , it should have the format and gender is optional .
+
+<br>
+
+## Generics ##
+
+<br>
+
+* Generics are types which can hold  or use several types .
+
+<br>
+
+```javascript
+let variable : Array<number>  // Here `Array` is the type `<number>` . It means the Array should have only `numbers` .
+```
+
+<br>

@@ -19,7 +19,6 @@ import { StoreDevtoolsModule} from '@ngrx/store-devtools';
 import { StoreRouterConnectingModule } from '@ngrx/router-store'
 import { environment } from 'src/environments/environment';
 import { RecipesEffects } from './recipes/Store/recipe.effects';
-import { AppServerModule } from './app.server.module';
 
 @NgModule({
   declarations: [
@@ -40,7 +39,6 @@ import { AppServerModule } from './app.server.module';
     EffectsModule.forRoot([AuthEffects , RecipesEffects]),
     StoreDevtoolsModule.instrument({ logOnly : environment.production}) ,
     StoreRouterConnectingModule.forRoot(),
-    AppServerModule
   ],
 
   bootstrap: [AppComponent]
